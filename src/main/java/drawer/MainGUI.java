@@ -3,8 +3,10 @@ package drawer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ public class MainGUI extends Application {
     private TextField targetNameField;
     private ListView<String> nameListView;
     private TextArea resultTextArea;
+    private BarChart<String, Number> barChart;
+    private GraphDrawer graphDrawer;
 
     public static void main(String[] args) {
         launch(args);
@@ -57,11 +61,14 @@ public class MainGUI extends Application {
         grid.add(addButton, 0, 2);
         grid.add(analyzeButton, 1, 2);
 
+        graphDrawer = new GraphDrawer();
+        barChart = graphDrawer.getBarChart();
+
         VBox vbox = new VBox(10);
         vbox.setPadding(new Insets(10, 10, 10, 10));
-        vbox.getChildren().addAll(grid, nameListView, resultTextArea);
+        vbox.getChildren().addAll(grid, resultTextArea ,nameListView, barChart);
 
-        Scene scene = new Scene(vbox, 400, 400);
+        Scene scene = new Scene(vbox, 800, 400);
 
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -77,7 +84,7 @@ public class MainGUI extends Application {
 
     private void analyzeText() {
         String folderPath = folderPathField.getText();
-        List<String> targetNames = nameListView.getItems().stream().collect(Collectors.toList());
+        List<String> targetNames = nameListView.getItems();//.stream().collect(Collectors.toList());
 
         TextFileReader reader = new TextFileReader(folderPath);
         reader.readFilesInFolder();
@@ -90,11 +97,12 @@ public class MainGUI extends Application {
             for (String name : targetNames) {
                 result.append("Occurrences of '").append(name).append("': ")
                         .append(nameOccurrencesMap.get(name).get("Occurrences")).append("\n");
-                result.append("Positions of '").append(name).append("': ")
-                        .append(nameOccurrencesMap.get(name).get("Positions")).append("\n\n");
+//                result.append("Positions of '").append(name).append("': ")
+//                        .append(nameOccurrencesMap.get(name).get("Positions")).append("\n\n");
             }
 
             resultTextArea.setText(result.toString());
+            graphDrawer.updateGraph(nameOccurrencesMap);
         } else {
             resultTextArea.setText("No file contents found.");
         }

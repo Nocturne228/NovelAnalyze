@@ -1,44 +1,48 @@
 package drawer;
 
-import javafx.application.Application;
-import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
-import javafx.stage.Stage;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public class GraphDrawer extends Application {
+public class GraphDrawer {
+    private final BarChart<String, Number> barChart;
+    private final CategoryAxis xAxis = new CategoryAxis();
+    private final NumberAxis yAxis = new NumberAxis();
 
-    @Override
-    public void start(Stage stage) {
-        stage.setTitle("散点图示例");
+    public GraphDrawer() {
+        xAxis.setLabel("Names");
+        yAxis.setLabel("Occurrences");
 
-        // 创建x轴和y轴
-        NumberAxis xAxis = new NumberAxis(0, 1, 0.1);
-        NumberAxis yAxis = new NumberAxis(0, 1, 0.1);
+        barChart = new BarChart<>(xAxis, yAxis);
+        barChart.setTitle("Name Occurrences");
 
-        ScatterChart<Number, Number> scatterChart = new ScatterChart<>(xAxis, yAxis);
-        scatterChart.setTitle("散点图示例");
-
-        // 创建数据系列
-        XYChart.Series<Number, Number> series = new XYChart.Series<>();
-        series.setName("数据点");
-
-        // 添加数据点
-        series.getData().add(new XYChart.Data<>(0.2, 0.8));
-        series.getData().add(new XYChart.Data<>(0.4, 0.6));
-        series.getData().add(new XYChart.Data<>(0.6, 0.4));
-        series.getData().add(new XYChart.Data<>(0.8, 0.2));
-
-        scatterChart.getData().add(series);
-
-        Scene scene = new Scene(scatterChart, 400, 400);
-        stage.setScene(scene);
-        stage.show();
+        // Add the BarChart to a layout (e.g., VBox)
     }
 
-    public static void main(String[] args) {
-        launch(args);
+    public BarChart<String, Number> getBarChart() {
+        return barChart;
+    }
+
+    public void updateGraph(Map<String, Map<String, Object>> nameOccurrencesMap) {
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Occurrences");
+
+        // 获取人名和出现次数的映射
+        Map<String, Integer> nameOccurrences = nameOccurrencesMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> (int) entry.getValue().get("Occurrences")));
+
+        // 按出现次数从低到高排序
+        nameOccurrences.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .forEach(entry -> {
+                    String name = entry.getKey();
+                    int occurrences = entry.getValue();
+                    series.getData().add(new XYChart.Data<>(name, occurrences));
+                });
+
+        barChart.getData().setAll(series);
     }
 }
-
