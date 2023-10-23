@@ -1,13 +1,14 @@
 package count;
 
-import java.util.ArrayList;
+import figure.FigureInfo;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class TextCount
 {
-    public static void analyzeData(List<String> fileContents,List<FigureInfo>  targetFigureList)
+    public static void analyzeData(List<String> fileContents, List<FigureInfo>  targetFigureList)
     {
 
         for (FigureInfo figure : targetFigureList)
@@ -31,4 +32,6 @@ public class TextCount
             nameOccurrencesMap.put(figure.getName(), nameInfo);
         }
     }
+
+
 }

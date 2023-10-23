@@ -4,6 +4,10 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.text.Font;
+
+import javax.sql.XAConnection;
+import java.awt.*;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -15,6 +19,11 @@ public class GraphDrawer {
     public GraphDrawer() {
         xAxis.setLabel("Names");
         yAxis.setLabel("Occurrences");
+        xAxis.setGapStartAndEnd(true); // 使标签在起始和结束处有间隔
+        xAxis.setAnimated(false);
+        Font chineseFont = Font.font("STKaiti");
+        xAxis.setTickLabelFont(chineseFont);
+
 
         barChart = new BarChart<>(xAxis, yAxis);
         barChart.setTitle("Name Occurrences");
