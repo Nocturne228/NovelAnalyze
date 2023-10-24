@@ -336,7 +336,7 @@ public class MainGUI extends Application {
             }
             resultTextArea.setText(result.toString());
 
-            graphDrawer.updateGraph(nameOccurrencesMap);
+            graphDrawer.updateBarGraph(nameOccurrencesMap);
         } else {
             resultTextArea.setText("No file contents found.");
         }

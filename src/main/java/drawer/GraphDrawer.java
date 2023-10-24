@@ -35,7 +35,7 @@ public class GraphDrawer {
         return barChart;
     }
 
-    public void updateGraph(Map<String, Map<String, Object>> nameOccurrencesMap) {
+    public void updateBarGraph(Map<String, Map<String, Object>> nameOccurrencesMap) {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Occurrences");
 
