@@ -1,7 +1,6 @@
 package drawer;
 
 import javafx.application.Application;
-import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -27,8 +26,8 @@ public class MainGUI extends Application {
     private ListView<String> nameListView;
     private TableView<FigureInfo> nameTableView;
     private TextArea resultTextArea;
-    private BarChart<String, Number> barChart;
-    private GraphDrawer graphDrawer;
+    private BarChart<String, Number> OccurrenceBarChart;
+    private OccurrenceBarGraphDrawer OccurrenceGraphDrawer;
     private ComboBox<String> nameComboBox;
     private Map<String, List<String>> nameAliasMap;
     private List<FigureInfo> targetFigureList;
@@ -83,10 +82,13 @@ public class MainGUI extends Application {
         Button addAliasButton = new Button("Add Alias");
         Button initButton = new Button("Initialize");
         Button refreshButton = new Button("Refresh");
+        Button saveButton = new Button("Save");
         refreshButton.setPrefWidth(150);
         addAliasButton.setPrefWidth(150);
+        addButton.setPrefWidth(150);
         initButton.setPrefWidth(150);
-        analyzeButton.setPrefWidth(150);
+        analyzeButton.setMaxWidth(150);
+        saveButton.setPrefWidth(150);
 
 
         // Create nameListView
@@ -110,7 +112,7 @@ public class MainGUI extends Application {
         });
         analyzeButton.setOnAction(e -> analyzeText());
         initButton.setOnAction(e -> initNames());
-        refreshButton.setOnAction(e -> refreshData(targetFigureList));
+        refreshButton.setOnAction(e -> refreshData());
 
 
         // Create column constraint for GridPane
@@ -142,14 +144,15 @@ public class MainGUI extends Application {
         grid.add(targetNameField, 1, 1);
         grid.add(aliasNameLabel, 0, 2);
         grid.add(aliasNameField, 1, 2); // 别名输入框
-        grid.add(addButton, 1, 3);
-        grid.add(analyzeButton, 2, 0);
+        grid.add(analyzeButton, 1, 3);
+        grid.add(refreshButton, 0, 3);
         grid.add(nameListView, 3, 0);
         // 设置 ListView 跨越整个第三列
         GridPane.setRowSpan(nameListView, 4);
         grid.add(addAliasButton, 2, 2);
         grid.add(initButton, 2, 3);
-        grid.add(refreshButton, 2, 1);
+        grid.add(addButton, 2, 1);
+        grid.add(saveButton, 2, 0);
 
         // Set resultTextArea growable
         VBox.setVgrow(resultTextArea, Priority.ALWAYS);
@@ -190,14 +193,14 @@ public class MainGUI extends Application {
         leftVBox.getChildren().addAll(grid, nameTableView);
 
         // draw bar chart
-        graphDrawer = new GraphDrawer();
-        barChart = graphDrawer.getBarChart();
+        OccurrenceGraphDrawer = new OccurrenceBarGraphDrawer();
+        OccurrenceBarChart = OccurrenceGraphDrawer.getBarChart();
 
 
         // set root
         root.setLeft(leftVBox);
         root.setCenter(resultTextArea);
-        root.setBottom(barChart);
+        root.setBottom(OccurrenceBarChart);
 
         Scene scene = new Scene(root, 1000, 800);
 
@@ -205,12 +208,14 @@ public class MainGUI extends Application {
         primaryStage.show();
     }
 
-    public void refreshData(List<FigureInfo> figureList)
+    public void refreshData()
     {
-        for (FigureInfo figure : figureList)
-        {
-            figure.refreshData();
-        }
+//        Iterator iterator = targetFigureList.iterator();
+//        while (iterator.hasNext())
+//        {
+//            iterator.remove();
+//        }
+        targetFigureList.clear();
         resultTextArea.clear();
         nameListView.getItems().clear();
         nameComboBox.getItems().clear();
@@ -255,7 +260,6 @@ public class MainGUI extends Application {
 
     private void addName()
     {
-
         String targetName = targetNameField.getText().trim();
         System.out.println(targetName);
         if (!targetName.isEmpty())
@@ -311,6 +315,16 @@ public class MainGUI extends Application {
     }
 
     private void analyzeText() {
+        if (targetFigureList.isEmpty())
+        {
+            return;
+        }
+
+        for (FigureInfo figure : targetFigureList)
+        {
+            figure.refreshData();
+        }
+
         String folderPath = "/Users/nocturne/Downloads/Project/Java/NovelAnalyze/src/main/" + folderPathField.getText();
 
         TextFileReader reader = new TextFileReader(folderPath);
@@ -326,8 +340,8 @@ public class MainGUI extends Application {
             for (FigureInfo figure : targetFigureList) {
                 result.append("Occurrences of '").append(figure.getName()).append("': ")
                         .append(figure.getOccurrences()).append("\n");
-//                result.append("Positions of '").append(name).append("': ")
-//                        .append(nameOccurrencesMap.get(name).get("Positions")).append("\n\n");
+                result.append("Positions of '").append(figure.getName()).append("': ")
+                        .append(figure.getPosition()).append("\n\n");
 
                 Map<String, Object> nameInfo = new HashMap<>();
                 nameInfo.put("Occurrences", figure.getOccurrences());
@@ -336,8 +350,11 @@ public class MainGUI extends Application {
             }
             resultTextArea.setText(result.toString());
 
-            graphDrawer.updateBarGraph(nameOccurrencesMap);
-        } else {
+            OccurrenceGraphDrawer.updateBarGraph(nameOccurrencesMap);
+
+        }
+        else
+        {
             resultTextArea.setText("No file contents found.");
         }
     }

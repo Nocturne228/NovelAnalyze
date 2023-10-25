@@ -5,7 +5,7 @@ import java.util.List;
 
 public class FigureInfo
 {
-    private final String name;
+    private String name;
     private String aliasName1;
     private String aliasName2;
     private String aliasName3;
@@ -96,7 +96,12 @@ public class FigureInfo
 
     public void refreshData()
     {
-            this.setOccurrences(0);
-            this.clearPosition();
+        this.setOccurrences(0);
+        this.clearPosition();
+    }
+
+    public void clearName()
+    {
+        this.name = "";
     }
 }

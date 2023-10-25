@@ -6,17 +6,16 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.text.Font;
 
-import javax.sql.XAConnection;
-import java.awt.*;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class GraphDrawer {
+public class OccurrenceBarGraphDrawer
+{
     private final BarChart<String, Number> barChart;
     private final CategoryAxis xAxis = new CategoryAxis();
     private final NumberAxis yAxis = new NumberAxis();
 
-    public GraphDrawer() {
+    public OccurrenceBarGraphDrawer() {
         xAxis.setLabel("Names");
         yAxis.setLabel("Occurrences");
         xAxis.setGapStartAndEnd(true); // 使标签在起始和结束处有间隔
