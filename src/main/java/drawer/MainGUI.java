@@ -6,6 +6,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
+import javafx.scene.chart.StackedBarChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
@@ -19,6 +20,7 @@ import count.TextCount;
 import figure.FigureInfo;
 
 public class MainGUI extends Application {
+    private int totalTextLength;
 
     private TextField folderPathField;
     private TextField targetNameField;
@@ -26,14 +28,23 @@ public class MainGUI extends Application {
     private ListView<String> nameListView;
     private TableView<FigureInfo> nameTableView;
     private TextArea resultTextArea;
-    private BarChart<String, Number> OccurrenceBarChart;
-    private OccurrenceBarGraphDrawer OccurrenceGraphDrawer;
+    private BarChart<String, Number> occurrenceBarChart;
+    private StackedBarChart<String, Number> stackSpanBarChart;
+    private GraphDrawer graphDrawer;
     private ComboBox<String> nameComboBox;
     private Map<String, List<String>> nameAliasMap;
     private List<FigureInfo> targetFigureList;
     private ObservableList<FigureInfo> data;
+    private Button personButton;
+    private HBox bottomHBox;
 
-    public static void main(String[] args)
+
+//    public static void main(String[] args)
+//    {
+//        launch(args);
+//    }
+
+    public void show(String[] args)
     {
         launch(args);
     }
@@ -49,9 +60,13 @@ public class MainGUI extends Application {
         // Create primary container
         BorderPane root = new BorderPane();
 
-        // Create vertical alignment container
+        // Create vertical alignment container to contain grid and tableview
         VBox leftVBox = new VBox(10);
         leftVBox.setPadding(new Insets(10, 10, 10, 10));
+
+        // Create horizon alignment container to contain two graphs
+        bottomHBox = new HBox(10);
+        bottomHBox.setPadding(new Insets(10, 10, 10, 10));
 
         // Create Grid alignment container
         GridPane grid = new GridPane();
@@ -81,14 +96,16 @@ public class MainGUI extends Application {
         Button analyzeButton = new Button("Analyze");
         Button addAliasButton = new Button("Add Alias");
         Button initButton = new Button("Initialize");
-        Button refreshButton = new Button("Refresh");
-        Button saveButton = new Button("Save");
+        Button refreshButton = new Button("Reset");
+        personButton = new Button("Person");
+
+
         refreshButton.setPrefWidth(150);
         addAliasButton.setPrefWidth(150);
         addButton.setPrefWidth(150);
         initButton.setPrefWidth(150);
         analyzeButton.setMaxWidth(150);
-        saveButton.setPrefWidth(150);
+        personButton.setPrefWidth(150);
 
 
         // Create nameListView
@@ -113,6 +130,7 @@ public class MainGUI extends Application {
         analyzeButton.setOnAction(e -> analyzeText());
         initButton.setOnAction(e -> initNames());
         refreshButton.setOnAction(e -> refreshData());
+        personButton.setOnAction(e -> togglePersonView());
 
 
         // Create column constraint for GridPane
@@ -152,7 +170,7 @@ public class MainGUI extends Application {
         grid.add(addAliasButton, 2, 2);
         grid.add(initButton, 2, 3);
         grid.add(addButton, 2, 1);
-        grid.add(saveButton, 2, 0);
+        grid.add(personButton, 2, 0);
 
         // Set resultTextArea growable
         VBox.setVgrow(resultTextArea, Priority.ALWAYS);
@@ -171,19 +189,19 @@ public class MainGUI extends Application {
 
         TableColumn<FigureInfo, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(
-                new PropertyValueFactory<FigureInfo, String>("name")
+                new PropertyValueFactory<>("name")
         );
         TableColumn<FigureInfo, String> aliasName1Column = new TableColumn<>("Alias1");
         aliasName1Column.setCellValueFactory(
-                new PropertyValueFactory<FigureInfo, String>("aliasName1")
+                new PropertyValueFactory<>("aliasName1")
         );
         TableColumn<FigureInfo, String> aliasName2Column = new TableColumn<>("Alias2");
         aliasName2Column.setCellValueFactory(
-                new PropertyValueFactory<FigureInfo, String>("aliasName2")
+                new PropertyValueFactory<>("aliasName2")
         );
         TableColumn<FigureInfo, String> aliasName3Column = new TableColumn<>("Alias3");
         aliasName3Column.setCellValueFactory(
-                new PropertyValueFactory<FigureInfo, String>("aliasName3")
+                new PropertyValueFactory<>("aliasName3")
         );
         nameTableView.setItems(this.data);
         nameTableView.getColumns().addAll(nameColumn, aliasName1Column, aliasName2Column, aliasName3Column);
@@ -193,14 +211,20 @@ public class MainGUI extends Application {
         leftVBox.getChildren().addAll(grid, nameTableView);
 
         // draw bar chart
-        OccurrenceGraphDrawer = new OccurrenceBarGraphDrawer();
-        OccurrenceBarChart = OccurrenceGraphDrawer.getBarChart();
+
+        graphDrawer = new GraphDrawer();
+        occurrenceBarChart = graphDrawer.getOccurrenceBarChart();
+        stackSpanBarChart = graphDrawer.getSpanBarChart();
+
+        bottomHBox.getChildren().addAll(occurrenceBarChart, stackSpanBarChart);
 
 
         // set root
         root.setLeft(leftVBox);
         root.setCenter(resultTextArea);
-        root.setBottom(OccurrenceBarChart);
+//        root.setBottom(occurrenceBarChart);
+//        root.setBottom(stackSpanBarChart);
+        root.setBottom(bottomHBox);
 
         Scene scene = new Scene(root, 1000, 800);
 
@@ -229,15 +253,40 @@ public class MainGUI extends Application {
         targetFigureList.add(new FigureInfo(("曹操")));
         targetFigureList.get(0).setAliasName("孟德");
         targetFigureList.get(0).setAliasName("丞相");
+
         targetFigureList.add(new FigureInfo(("刘备")));
+        targetFigureList.get(1).setAliasName("玄德");
+        targetFigureList.get(1).setAliasName("皇叔");
+        targetFigureList.get(1).setAliasName("使君");
+
         targetFigureList.add(new FigureInfo(("孙权")));
+        targetFigureList.get(2).setAliasName("仲谋");
+        targetFigureList.get(2).setAliasName("吴侯");
+
         targetFigureList.add(new FigureInfo(("关羽")));
+        targetFigureList.get(3).setAliasName("云长");
+        targetFigureList.get(3).setAliasName("关公");
+
         targetFigureList.add(new FigureInfo(("诸葛亮")));
+        targetFigureList.get(4).setAliasName("孔明");
+        targetFigureList.get(4).setAliasName("卧龙");
+
         targetFigureList.add(new FigureInfo(("郭嘉")));
+        targetFigureList.get(5).setAliasName("奉孝");
+
         targetFigureList.add(new FigureInfo(("周瑜")));
+        targetFigureList.get(6).setAliasName("公瑾");
+        targetFigureList.get(6).setAliasName("周郎");
+
         targetFigureList.add(new FigureInfo(("赵云")));
+        targetFigureList.get(7).setAliasName("子龙");
+
         targetFigureList.add(new FigureInfo(("吕布")));
+        targetFigureList.get(8).setAliasName("奉先");
+        targetFigureList.get(8).setAliasName("温侯");
+
         targetFigureList.add(new FigureInfo(("董卓")));
+        targetFigureList.get(9).setAliasName("仲颖");
 
         for (FigureInfo figure : targetFigureList)
         {
@@ -288,17 +337,19 @@ public class MainGUI extends Application {
     private void addAliasName(String targetName)
     {
         String alias = aliasNameField.getText().trim();
+        System.out.println("alias name get:");
         System.out.println(alias);
         for (FigureInfo figure : targetFigureList)
         {
             if (targetName.equals(figure.getName()))
             {
-                System.out.println("Success!");
                 figure.setAliasName(alias);
 
+                System.out.println("Name" + figure.getName());
                 System.out.println(figure.getAliasName1());
                 System.out.println(figure.getAliasName2());
                 System.out.println(figure.getAliasName3());
+                System.out.println("Success added!");
                 break;
             }
         }
@@ -310,7 +361,6 @@ public class MainGUI extends Application {
 //            nameAliasMap.get(selectedName).add(alias);
 
         aliasNameField.clear();
-        nameTableView.refresh();
         System.out.println("Table Refreshed");
     }
 
@@ -350,12 +400,33 @@ public class MainGUI extends Application {
             }
             resultTextArea.setText(result.toString());
 
-            OccurrenceGraphDrawer.updateBarGraph(nameOccurrencesMap);
+            totalTextLength = fileContents.size();
+
+            graphDrawer.updateOccurrenceBarGraph(nameOccurrencesMap);
+            graphDrawer.updateSpanGraph(targetFigureList, totalTextLength);
 
         }
         else
         {
             resultTextArea.setText("No file contents found.");
+        }
+    }
+
+    private void togglePersonView() {
+        boolean isBottomVisible = bottomHBox.isVisible();
+
+        if (isBottomVisible) {
+            bottomHBox.setVisible(false);
+            personButton.setText("Back");
+            personButton.setOnAction(e -> togglePersonView());
+            // 还可以执行其他隐藏的逻辑，比如将 VBox 显示出来
+            // vbox.setVisible(true);
+        } else {
+            bottomHBox.setVisible(true);
+            personButton.setText("Person");
+            personButton.setOnAction(e -> togglePersonView());
+            // 反之，隐藏 VBox
+            // vbox.setVisible(false);
         }
     }
 }

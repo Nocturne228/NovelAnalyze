@@ -1,5 +1,4 @@
 package figure;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +8,7 @@ public class FigureInfo
     private String aliasName1;
     private String aliasName2;
     private String aliasName3;
+    private int aliasNameNumber;
     private List<Integer> position;
     private List<String> aliasNameList;
     private int occurrences;
@@ -29,19 +29,28 @@ public class FigureInfo
         if (aliasName1 == null)
         {
             aliasName1 = aliasName;
+            System.out.println("alias1 added:");
+            System.out.println(aliasName1);
+            this.aliasNameNumber = 1;
         }
         else if (aliasName2 == null)
         {
             aliasName2 = aliasName;
+            System.out.println("alias2 added:");
+            System.out.println(aliasName2);
+            this.aliasNameNumber = 2;
         }
         else
         {
             aliasName3 = aliasName;
+            System.out.println("alias3 added:");
+            System.out.println(aliasName3);
+            this.aliasNameNumber = 3;
         }
 
     }
 
-    public void addPostion(int newPosition)
+    public void addPosition(int newPosition)
     {
         this.position.add(newPosition);
     }
@@ -54,11 +63,6 @@ public class FigureInfo
     public String getName()
     {
         return name;
-    }
-
-    public List<String> getAliasName()
-    {
-        return aliasNameList;
     }
 
     public String getAliasName1()
@@ -94,14 +98,15 @@ public class FigureInfo
         this.position.clear();
     }
 
+    public int getAliasNameNumber()
+    {
+        return aliasNameNumber;
+    }
+
     public void refreshData()
     {
         this.setOccurrences(0);
         this.clearPosition();
     }
 
-    public void clearName()
-    {
-        this.name = "";
-    }
 }
