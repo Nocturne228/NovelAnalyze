@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 public class TextCount
 {
+    private long totalCharacterCount;
     public static void analyzeData(List<String> fileContents, List<FigureInfo>  targetFigureList)
     {
 
@@ -20,26 +21,26 @@ public class TextCount
                 String content = fileContents.get(i);
 
                 String figureName = figure.getName();
-//                String regex = buildRegex(figure);
+                String regex = buildRegex(figure);
 
-//                Pattern pattern = Pattern.compile(regex);
-//                Matcher matcher = pattern.matcher(content);
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(content);
 
-//                while (matcher.find())
-//                {
-//                    int index = matcher.start();
-//                    figure.addPosition(index);
-//                    figure.incOccurrences();
-//                }
-
-
-                int index = content.indexOf(figure.getName());
-                while (index != -1)
+                while (matcher.find())
                 {
+                    int index = matcher.start();
                     figure.addPosition(index);
                     figure.incOccurrences();
-                    index = content.indexOf(figure.getName(), index + figure.getName().length());
                 }
+
+
+//                int index = content.indexOf(figure.getName());
+//                while (index != -1)
+//                {
+//                    figure.addPosition(index);
+//                    figure.incOccurrences();
+//                    index = content.indexOf(figure.getName(), index + figure.getName().length());
+//                }
             }
 
             Map<String, Map<String, Object>> nameOccurrencesMap = new HashMap<>(); // 记录每个人名的出现次数和位置
@@ -55,13 +56,13 @@ public class TextCount
         StringBuilder regexBuilder = new StringBuilder();
         regexBuilder.append(Pattern.quote(figure.getName()));
 
-        if (!figure.getAliasName1() .equals("")) {
+        if (figure.getAliasName1() != null) {
             regexBuilder.append("|").append(Pattern.quote(figure.getAliasName1()));
         }
-        if (!figure.getAliasName2().equals("")) {
+        if (figure.getAliasName2() != null) {
             regexBuilder.append("|").append(Pattern.quote(figure.getAliasName2()));
         }
-        if (!figure.getAliasName3().equals("")) {
+        if (figure.getAliasName3() != null) {
             regexBuilder.append("|").append(Pattern.quote(figure.getAliasName3()));
         }
 

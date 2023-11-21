@@ -10,7 +10,6 @@ import javafx.scene.chart.StackedBarChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.util.*;
@@ -18,9 +17,9 @@ import java.util.*;
 import readtxt.TextFileReader;
 import count.TextCount;
 import figure.FigureInfo;
+import drawer.GraphDrawer.*;
 
 public class MainGUI extends Application {
-    private int totalTextLength;
 
     private TextField folderPathField;
     private TextField targetNameField;
@@ -30,13 +29,15 @@ public class MainGUI extends Application {
     private TextArea resultTextArea;
     private BarChart<String, Number> occurrenceBarChart;
     private StackedBarChart<String, Number> stackSpanBarChart;
+    private BarChartExt<String, Number> spanBarChart;
     private GraphDrawer graphDrawer;
     private ComboBox<String> nameComboBox;
-    private Map<String, List<String>> nameAliasMap;
     private List<FigureInfo> targetFigureList;
     private ObservableList<FigureInfo> data;
     private Button personButton;
     private HBox bottomHBox;
+    private HBox personHBox;
+    private int totalCharacterCount;
 
 
 //    public static void main(String[] args)
@@ -53,7 +54,7 @@ public class MainGUI extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Text Analyzer");
 
-        Font chineseFont = Font.font("STKaiti");
+//        Font chineseFont = Font.font("STKaiti");
 
         targetFigureList = new ArrayList<>();
 
@@ -67,6 +68,9 @@ public class MainGUI extends Application {
         // Create horizon alignment container to contain two graphs
         bottomHBox = new HBox(10);
         bottomHBox.setPadding(new Insets(10, 10, 10, 10));
+
+//        personHBox = new HBox(10);
+//        personHBox.setPadding(new Insets(10, 10, 10, 10));
 
         // Create Grid alignment container
         GridPane grid = new GridPane();
@@ -89,7 +93,7 @@ public class MainGUI extends Application {
         Label aliasNameLabel = new Label("Alias Names:");
         aliasNameField = new TextField();
         aliasNameField.setPromptText("Add alias name");
-        nameAliasMap = new HashMap<>();
+        Map<String, List<String>> nameAliasMap = new HashMap<>();
 
         // Create buttons
         Button addButton = new Button("Add Name");
@@ -214,14 +218,15 @@ public class MainGUI extends Application {
 
         graphDrawer = new GraphDrawer();
         occurrenceBarChart = graphDrawer.getOccurrenceBarChart();
-        stackSpanBarChart = graphDrawer.getSpanBarChart();
+        stackSpanBarChart = graphDrawer.getStackSpanBarChart();
+        spanBarChart = graphDrawer.getSpanBarChart();
 
         bottomHBox.getChildren().addAll(occurrenceBarChart, stackSpanBarChart);
 
 
         // set root
         root.setLeft(leftVBox);
-        root.setCenter(resultTextArea);
+        root.setCenter(spanBarChart);
 //        root.setBottom(occurrenceBarChart);
 //        root.setBottom(stackSpanBarChart);
         root.setBottom(bottomHBox);
@@ -381,6 +386,14 @@ public class MainGUI extends Application {
         reader.readFilesInFolder();
         List<String> fileContents = reader.getFileContents();
 
+
+        this.totalCharacterCount = fileContents.stream()
+                .mapToInt(s -> s.length())
+                .sum();
+
+        System.out.println(totalCharacterCount);
+
+
         if (fileContents != null)
         {
             TextCount.analyzeData(fileContents, targetFigureList);
@@ -400,10 +413,10 @@ public class MainGUI extends Application {
             }
             resultTextArea.setText(result.toString());
 
-            totalTextLength = fileContents.size();
 
             graphDrawer.updateOccurrenceBarGraph(nameOccurrencesMap);
-            graphDrawer.updateSpanGraph(targetFigureList, totalTextLength);
+            graphDrawer.updateSpanGraph(targetFigureList);
+            graphDrawer.updateSpanBarChart(targetFigureList, totalCharacterCount);
 
         }
         else

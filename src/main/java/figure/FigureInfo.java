@@ -1,4 +1,5 @@
 package figure;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,8 +11,10 @@ public class FigureInfo
     private String aliasName3;
     private int aliasNameNumber;
     private List<Integer> position;
-    private List<String> aliasNameList;
     private int occurrences;
+    private int start;
+    private int end;
+    private int span;
 
     public FigureInfo(String name)
     {
@@ -109,4 +112,35 @@ public class FigureInfo
         this.clearPosition();
     }
 
+    public int getStart()
+    {
+        start = this.position.get(0);
+        return start;
+    }
+
+    public int getEnd()
+    {
+        end = this.position.get(this.position.size() - 1);
+        return end;
+    }
+
+    public int getSpan()
+    {
+        this.span = end - start;
+        return span;
+    }
+
+    public double spanPercentage(int totalCharacterCount)
+    {
+        double percentage = (double) this.span / totalCharacterCount;
+        return percentage;
+    }
+
+    public String calcSpanPercent(int totalCharacterCount)
+    {
+        double percentage = (double) this.span / totalCharacterCount;
+        DecimalFormat df = new DecimalFormat("0.00");
+        String formattedPercentage = df.format(percentage);
+        return (formattedPercentage + "%");
+    }
 }
