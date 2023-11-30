@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 
 public class TextCount
 {
-    private long totalCharacterCount;
     public static void analyzeData(List<String> fileContents, List<FigureInfo>  targetFigureList)
     {
 
@@ -20,7 +19,6 @@ public class TextCount
             {
                 String content = fileContents.get(i);
 
-                String figureName = figure.getName();
                 String regex = buildRegex(figure);
 
                 Pattern pattern = Pattern.compile(regex);
@@ -34,13 +32,6 @@ public class TextCount
                 }
 
 
-//                int index = content.indexOf(figure.getName());
-//                while (index != -1)
-//                {
-//                    figure.addPosition(index);
-//                    figure.incOccurrences();
-//                    index = content.indexOf(figure.getName(), index + figure.getName().length());
-//                }
             }
 
             Map<String, Map<String, Object>> nameOccurrencesMap = new HashMap<>(); // 记录每个人名的出现次数和位置
@@ -68,6 +59,7 @@ public class TextCount
 
         return regexBuilder.toString();
     }
+
 
 
 }

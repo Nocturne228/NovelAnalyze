@@ -1,19 +1,14 @@
 package drawer;
 
 import javafx.collections.FXCollections;
-import javafx.scene.Cursor;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.chart.*;
-import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 
-import java.awt.*;
-import java.lang.annotation.Target;
 import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 import figure.FigureInfo;
 import javafx.scene.text.Text;
 
@@ -106,39 +101,32 @@ public class GraphDrawer
             series2.getData().add(new XYChart.Data(figure.getName(), endPercentage));
 
         }
+        spanBarChart.getData().clear();
         spanBarChart.getData().setAll(series1, series2);
     }
 
-    public void updateOccurrenceBarGraph(Map<String, Map<String, Object>> nameOccurrencesMap) {
+    public void updateOccurrenceBarGraph(List<FigureInfo> targetFigureList) {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Occurrences");
+        ObservableList<String> data = FXCollections.observableArrayList();
 
-        // 获取人名和出现次数的映射
-        Map<String, Integer> nameOccurrences = nameOccurrencesMap.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> (int) entry.getValue().get("Occurrences")));
+        List<FigureInfo> sortedFigureList = targetFigureList.stream()
+                .sorted(Comparator.comparingInt(FigureInfo::getOccurrences))
+                .toList();
 
-        // 按出现次数从低到高排序
-        nameOccurrences.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue())
-                .forEach(entry -> {
-                    String name = entry.getKey();
-                    int occurrences = entry.getValue();
-                    series.getData().add(new XYChart.Data<>(name, occurrences));
-                });
+        series.getData().clear();
+        for (FigureInfo figure : sortedFigureList)
+        {
+            data.add(figure.getName());
+            System.out.println(figure.getName() + figure.getOccurrences());
+            series.getData().add(new XYChart.Data<>(figure.getName(), figure.getOccurrences()));
+        }
+        occurrenceX.setCategories(data);
 
+        OccurrenceBarChart.getData().clear();
         OccurrenceBarChart.getData().setAll(series);
 
     }
-
-//    public void updateOccurrenceBarChart(List<FigureInfo> targetFigureList)
-//    {
-//        XYChart.Series<String, Number> series = new XYChart.Series<>();
-//        series.setName("Occurrences");
-//
-//        List<FigureInfo> sortedFigureList = targetFigureList.stream()
-//                .sorted(Comparator.comparingInt(FigureInfo::getOccurrences))
-//                .toList();
-//    }
 
     public void updateSpanGraph(List<FigureInfo> targetFigureList) {
 
@@ -156,6 +144,7 @@ public class GraphDrawer
             seriesEnd.getData().add(new XYChart.Data<>(figure.getName(), figure.getEnd()));
         }
 
+        stackSpanBarChart.getData().clear();
         stackSpanBarChart.getData().addAll(seriesStart, seriesEnd);
     }
 

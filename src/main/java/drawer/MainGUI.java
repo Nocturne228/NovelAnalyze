@@ -25,7 +25,6 @@ public class MainGUI extends Application {
     private TextField targetNameField;
     private TextField aliasNameField;
     private ListView<String> nameListView;
-    private TableView<FigureInfo> nameTableView;
     private TextArea resultTextArea;
     private BarChart<String, Number> occurrenceBarChart;
     private StackedBarChart<String, Number> stackSpanBarChart;
@@ -37,13 +36,9 @@ public class MainGUI extends Application {
     private Button personButton;
     private HBox bottomHBox;
     private HBox personHBox;
-    private int totalCharacterCount;
+    public BorderPane root;
+//    TableView<FigureRelation> closeTableView = new TableView<>();
 
-
-//    public static void main(String[] args)
-//    {
-//        launch(args);
-//    }
 
     public void show(String[] args)
     {
@@ -59,7 +54,7 @@ public class MainGUI extends Application {
         targetFigureList = new ArrayList<>();
 
         // Create primary container
-        BorderPane root = new BorderPane();
+        root = new BorderPane();
 
         // Create vertical alignment container to contain grid and tableview
         VBox leftVBox = new VBox(10);
@@ -69,8 +64,8 @@ public class MainGUI extends Application {
         bottomHBox = new HBox(10);
         bottomHBox.setPadding(new Insets(10, 10, 10, 10));
 
-//        personHBox = new HBox(10);
-//        personHBox.setPadding(new Insets(10, 10, 10, 10));
+        personHBox = new HBox(10);
+        personHBox.setPadding(new Insets(10, 10, 10, 10));
 
         // Create Grid alignment container
         GridPane grid = new GridPane();
@@ -93,7 +88,6 @@ public class MainGUI extends Application {
         Label aliasNameLabel = new Label("Alias Names:");
         aliasNameField = new TextField();
         aliasNameField.setPromptText("Add alias name");
-        Map<String, List<String>> nameAliasMap = new HashMap<>();
 
         // Create buttons
         Button addButton = new Button("Add Name");
@@ -102,6 +96,7 @@ public class MainGUI extends Application {
         Button initButton = new Button("Initialize");
         Button refreshButton = new Button("Reset");
         personButton = new Button("Person");
+        Button selectButton = new Button("Select Person");
 
 
         refreshButton.setPrefWidth(150);
@@ -110,6 +105,7 @@ public class MainGUI extends Application {
         initButton.setPrefWidth(150);
         analyzeButton.setMaxWidth(150);
         personButton.setPrefWidth(150);
+        selectButton.setPrefWidth(150);
 
 
         // Create nameListView
@@ -135,6 +131,13 @@ public class MainGUI extends Application {
         initButton.setOnAction(e -> initNames());
         refreshButton.setOnAction(e -> refreshData());
         personButton.setOnAction(e -> togglePersonView());
+        selectButton.setOnAction(e -> {
+            String selectedName = nameListView.getSelectionModel().getSelectedItem();
+            if (selectedName != null)
+            {
+                personAnalyze(selectedName);
+            }
+        });
 
 
         // Create column constraint for GridPane
@@ -165,12 +168,14 @@ public class MainGUI extends Application {
         grid.add(targetNameLabel, 0, 1);
         grid.add(targetNameField, 1, 1);
         grid.add(aliasNameLabel, 0, 2);
-        grid.add(aliasNameField, 1, 2); // 别名输入框
+        grid.add(aliasNameField, 1, 2);
         grid.add(analyzeButton, 1, 3);
         grid.add(refreshButton, 0, 3);
-        grid.add(nameListView, 3, 0);
-        // 设置 ListView 跨越整个第三列
-        GridPane.setRowSpan(nameListView, 4);
+        grid.add(nameListView, 3, 1);
+        grid.add(selectButton, 3, 0);
+
+//        GridPane.setRowSpan(nameListView, 4);
+        GridPane.setRowSpan(nameListView, 3);
         grid.add(addAliasButton, 2, 2);
         grid.add(initButton, 2, 3);
         grid.add(addButton, 2, 1);
@@ -183,9 +188,6 @@ public class MainGUI extends Application {
 
 
         // show names in format of table
-        nameTableView = new TableView<>();
-        nameTableView.setEditable(true);
-        nameTableView.setPrefWidth(200);
 
         TableView<FigureInfo> nameTableView = new TableView<>();
 
@@ -213,6 +215,7 @@ public class MainGUI extends Application {
 
         // add grid and nameListView to container
         leftVBox.getChildren().addAll(grid, nameTableView);
+        leftVBox.setMaxSize(500, 360);
 
         // draw bar chart
 
@@ -227,8 +230,6 @@ public class MainGUI extends Application {
         // set root
         root.setLeft(leftVBox);
         root.setCenter(spanBarChart);
-//        root.setBottom(occurrenceBarChart);
-//        root.setBottom(stackSpanBarChart);
         root.setBottom(bottomHBox);
 
         Scene scene = new Scene(root, 1000, 800);
@@ -239,25 +240,31 @@ public class MainGUI extends Application {
 
     public void refreshData()
     {
-//        Iterator iterator = targetFigureList.iterator();
-//        while (iterator.hasNext())
-//        {
-//            iterator.remove();
-//        }
         targetFigureList.clear();
         resultTextArea.clear();
         nameListView.getItems().clear();
         nameComboBox.getItems().clear();
         data.clear();
 
+        occurrenceBarChart.getData().clear();
+        spanBarChart.getData().clear();
+        stackSpanBarChart.getData().clear();
+
     }
+
+    public void personAnalyze(String figureName)
+    {
+    }
+
+    // TODO: tableview of close figures: public void update closeTable()
 
     private void initNames()
     {
         targetFigureList.clear();
         targetFigureList.add(new FigureInfo(("曹操")));
+        targetFigureList.get(0).setAliasName("操");
         targetFigureList.get(0).setAliasName("孟德");
-        targetFigureList.get(0).setAliasName("丞相");
+        targetFigureList.get(0).setAliasName("阿瞒");
 
         targetFigureList.add(new FigureInfo(("刘备")));
         targetFigureList.get(1).setAliasName("玄德");
@@ -350,20 +357,9 @@ public class MainGUI extends Application {
             {
                 figure.setAliasName(alias);
 
-                System.out.println("Name" + figure.getName());
-                System.out.println(figure.getAliasName1());
-                System.out.println(figure.getAliasName2());
-                System.out.println(figure.getAliasName3());
-                System.out.println("Success added!");
                 break;
             }
         }
-
-//            if (!nameAliasMap.containsKey(selectedName))
-//            {
-//                nameAliasMap.put(selectedName, new ArrayList<>());
-//            }
-//            nameAliasMap.get(selectedName).add(alias);
 
         aliasNameField.clear();
         System.out.println("Table Refreshed");
@@ -387,8 +383,8 @@ public class MainGUI extends Application {
         List<String> fileContents = reader.getFileContents();
 
 
-        this.totalCharacterCount = fileContents.stream()
-                .mapToInt(s -> s.length())
+        int totalCharacterCount = fileContents.stream()
+                .mapToInt(String::length)
                 .sum();
 
         System.out.println(totalCharacterCount);
@@ -399,6 +395,8 @@ public class MainGUI extends Application {
             TextCount.analyzeData(fileContents, targetFigureList);
 
             StringBuilder result = new StringBuilder();
+
+            // TODO: 将map改为直接对targetFigureList操作
             Map<String, Map<String, Object>> nameOccurrencesMap = new HashMap<>(); // 记录每个人名的出现次数和位置
             for (FigureInfo figure : targetFigureList) {
                 result.append("Occurrences of '").append(figure.getName()).append("': ")
@@ -414,7 +412,8 @@ public class MainGUI extends Application {
             resultTextArea.setText(result.toString());
 
 
-            graphDrawer.updateOccurrenceBarGraph(nameOccurrencesMap);
+
+            graphDrawer.updateOccurrenceBarGraph(targetFigureList);
             graphDrawer.updateSpanGraph(targetFigureList);
             graphDrawer.updateSpanBarChart(targetFigureList, totalCharacterCount);
 
@@ -430,12 +429,22 @@ public class MainGUI extends Application {
 
         if (isBottomVisible) {
             bottomHBox.setVisible(false);
+            spanBarChart.setVisible(false);
+
+            root.setBottom(personHBox);
+            //TODO: root.setCenter()
+
             personButton.setText("Back");
             personButton.setOnAction(e -> togglePersonView());
             // 还可以执行其他隐藏的逻辑，比如将 VBox 显示出来
             // vbox.setVisible(true);
         } else {
             bottomHBox.setVisible(true);
+            spanBarChart.setVisible(true);
+
+            root.setBottom(bottomHBox);
+            //TODO: root.setCenter()
+
             personButton.setText("Person");
             personButton.setOnAction(e -> togglePersonView());
             // 反之，隐藏 VBox

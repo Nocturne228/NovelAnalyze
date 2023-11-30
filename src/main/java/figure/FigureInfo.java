@@ -32,22 +32,16 @@ public class FigureInfo
         if (aliasName1 == null)
         {
             aliasName1 = aliasName;
-            System.out.println("alias1 added:");
-            System.out.println(aliasName1);
             this.aliasNameNumber = 1;
         }
         else if (aliasName2 == null)
         {
             aliasName2 = aliasName;
-            System.out.println("alias2 added:");
-            System.out.println(aliasName2);
             this.aliasNameNumber = 2;
         }
         else
         {
             aliasName3 = aliasName;
-            System.out.println("alias3 added:");
-            System.out.println(aliasName3);
             this.aliasNameNumber = 3;
         }
 
@@ -99,11 +93,6 @@ public class FigureInfo
 
     public void clearPosition() {
         this.position.clear();
-    }
-
-    public int getAliasNameNumber()
-    {
-        return aliasNameNumber;
     }
 
     public void refreshData()
