@@ -105,7 +105,7 @@ public class GraphDrawer
         spanBarChart.getData().setAll(series1, series2);
     }
 
-    public void updateOccurrenceBarGraph(List<FigureInfo> targetFigureList) {
+    public void updateOccurrenceBarChart(List<FigureInfo> targetFigureList) {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Occurrences");
         ObservableList<String> data = FXCollections.observableArrayList();
@@ -128,7 +128,7 @@ public class GraphDrawer
 
     }
 
-    public void updateSpanGraph(List<FigureInfo> targetFigureList) {
+    public void updateStackSpanChart(List<FigureInfo> targetFigureList) {
 
         seriesStart.getData().clear();
         seriesEnd.getData().clear();
@@ -221,6 +221,8 @@ public class GraphDrawer
             }
         }
     }
+
+
 
 }
 

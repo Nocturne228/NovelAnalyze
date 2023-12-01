@@ -9,12 +9,14 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.StackedBarChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.util.*;
 
-import readtxt.TextFileReader;
+import fileio.TextFileReader;
 import count.TextCount;
 import figure.FigureInfo;
 import drawer.GraphDrawer.*;
@@ -37,6 +39,7 @@ public class MainGUI extends Application {
     private HBox bottomHBox;
     private HBox personHBox;
     public BorderPane root;
+    private Image occurrenceScatterPlotImage;
 //    TableView<FigureRelation> closeTableView = new TableView<>();
 
 
@@ -265,40 +268,50 @@ public class MainGUI extends Application {
         targetFigureList.get(0).setAliasName("操");
         targetFigureList.get(0).setAliasName("孟德");
         targetFigureList.get(0).setAliasName("阿瞒");
+        targetFigureList.get(0).setLabel(0);
 
         targetFigureList.add(new FigureInfo(("刘备")));
         targetFigureList.get(1).setAliasName("玄德");
         targetFigureList.get(1).setAliasName("皇叔");
         targetFigureList.get(1).setAliasName("使君");
+        targetFigureList.get(1).setLabel(1);
 
         targetFigureList.add(new FigureInfo(("孙权")));
         targetFigureList.get(2).setAliasName("仲谋");
         targetFigureList.get(2).setAliasName("吴侯");
+        targetFigureList.get(2).setLabel(2);
 
         targetFigureList.add(new FigureInfo(("关羽")));
         targetFigureList.get(3).setAliasName("云长");
         targetFigureList.get(3).setAliasName("关公");
+        targetFigureList.get(3).setLabel(3);
 
         targetFigureList.add(new FigureInfo(("诸葛亮")));
         targetFigureList.get(4).setAliasName("孔明");
         targetFigureList.get(4).setAliasName("卧龙");
+        targetFigureList.get(4).setLabel(4);
 
         targetFigureList.add(new FigureInfo(("郭嘉")));
         targetFigureList.get(5).setAliasName("奉孝");
+        targetFigureList.get(5).setLabel(5);
 
         targetFigureList.add(new FigureInfo(("周瑜")));
         targetFigureList.get(6).setAliasName("公瑾");
         targetFigureList.get(6).setAliasName("周郎");
+        targetFigureList.get(6).setLabel(6);
 
         targetFigureList.add(new FigureInfo(("赵云")));
         targetFigureList.get(7).setAliasName("子龙");
+        targetFigureList.get(7).setLabel(7);
 
         targetFigureList.add(new FigureInfo(("吕布")));
         targetFigureList.get(8).setAliasName("奉先");
         targetFigureList.get(8).setAliasName("温侯");
+        targetFigureList.get(8).setLabel(8);
 
         targetFigureList.add(new FigureInfo(("董卓")));
         targetFigureList.get(9).setAliasName("仲颖");
+        targetFigureList.get(9).setLabel(9);
 
         for (FigureInfo figure : targetFigureList)
         {
@@ -413,9 +426,11 @@ public class MainGUI extends Application {
 
 
 
-            graphDrawer.updateOccurrenceBarGraph(targetFigureList);
-            graphDrawer.updateSpanGraph(targetFigureList);
+            graphDrawer.updateOccurrenceBarChart(targetFigureList);
+            graphDrawer.updateStackSpanChart(targetFigureList);
             graphDrawer.updateSpanBarChart(targetFigureList, totalCharacterCount);
+
+            occurrenceScatterPlotImage = new Image("/scatter_plot.png");
 
         }
         else
@@ -433,16 +448,20 @@ public class MainGUI extends Application {
 
             root.setBottom(personHBox);
             //TODO: root.setCenter()
+            ImageView occurrenceScatterPlotImageView = new ImageView(occurrenceScatterPlotImage);
+            root.setCenter(occurrenceScatterPlotImageView);
 
             personButton.setText("Back");
             personButton.setOnAction(e -> togglePersonView());
             // 还可以执行其他隐藏的逻辑，比如将 VBox 显示出来
             // vbox.setVisible(true);
         } else {
+            root.getCenter().setVisible(false);
             bottomHBox.setVisible(true);
             spanBarChart.setVisible(true);
 
             root.setBottom(bottomHBox);
+            root.setCenter(spanBarChart);
             //TODO: root.setCenter()
 
             personButton.setText("Person");

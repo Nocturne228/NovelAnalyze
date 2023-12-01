@@ -15,6 +15,7 @@ public class FigureInfo
     private int start;
     private int end;
     private int span;
+    private int label;
 
     public FigureInfo(String name)
     {
@@ -45,6 +46,11 @@ public class FigureInfo
             this.aliasNameNumber = 3;
         }
 
+    }
+
+    public void setLabel(int label)
+    {
+        this.label = label;
     }
 
     public void addPosition(int newPosition)
@@ -85,6 +91,11 @@ public class FigureInfo
     public int getOccurrences()
     {
         return occurrences;
+    }
+
+    public int getLabel()
+    {
+        return label;
     }
 
     public void setOccurrences(int occurrences) {
