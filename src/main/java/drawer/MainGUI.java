@@ -1,5 +1,8 @@
 package drawer;
 
+import count.CountTest;
+import figure.FigureListInfo;
+import figure.FigureRelation;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -9,7 +12,6 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.StackedBarChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -34,13 +36,16 @@ public class MainGUI extends Application {
     private GraphDrawer graphDrawer;
     private ComboBox<String> nameComboBox;
     private List<FigureInfo> targetFigureList;
-    private ObservableList<FigureInfo> data;
+    private ObservableList<FigureInfo> nameData;
+    private ObservableList<FigureRelation> relationData;
     private Button personButton;
     private HBox bottomHBox;
     private HBox personHBox;
     public BorderPane root;
-    private Image occurrenceScatterPlotImage;
-//    TableView<FigureRelation> closeTableView = new TableView<>();
+    private ImageView occurrenceScatterPlotImageView;
+    private FigureListInfo figureListInfo;
+    private TableView<FigureInfo> nameTableView;
+    private TableView<FigureRelation> closeTableView;
 
 
     public void show(String[] args)
@@ -192,28 +197,37 @@ public class MainGUI extends Application {
 
         // show names in format of table
 
-        TableView<FigureInfo> nameTableView = new TableView<>();
+        nameTableView = new TableView<>();
+        setNameTableView();
 
-        this.data = FXCollections.observableArrayList();
+        this.relationData = FXCollections.observableArrayList();
 
-        TableColumn<FigureInfo, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellValueFactory(
-                new PropertyValueFactory<>("name")
-        );
-        TableColumn<FigureInfo, String> aliasName1Column = new TableColumn<>("Alias1");
-        aliasName1Column.setCellValueFactory(
-                new PropertyValueFactory<>("aliasName1")
-        );
-        TableColumn<FigureInfo, String> aliasName2Column = new TableColumn<>("Alias2");
-        aliasName2Column.setCellValueFactory(
-                new PropertyValueFactory<>("aliasName2")
-        );
-        TableColumn<FigureInfo, String> aliasName3Column = new TableColumn<>("Alias3");
-        aliasName3Column.setCellValueFactory(
-                new PropertyValueFactory<>("aliasName3")
-        );
-        nameTableView.setItems(this.data);
-        nameTableView.getColumns().addAll(nameColumn, aliasName1Column, aliasName2Column, aliasName3Column);
+        CountTest closeCount = new CountTest();
+        figureListInfo = new FigureListInfo(closeCount.getTargetFigureList());
+
+        closeTableView = new TableView<>();
+        setCloseTableView();
+
+//        this.data = FXCollections.observableArrayList();
+//
+//        TableColumn<FigureInfo, String> nameColumn = new TableColumn<>("Name");
+//        nameColumn.setCellValueFactory(
+//                new PropertyValueFactory<>("name")
+//        );
+//        TableColumn<FigureInfo, String> aliasName1Column = new TableColumn<>("Alias1");
+//        aliasName1Column.setCellValueFactory(
+//                new PropertyValueFactory<>("aliasName1")
+//        );
+//        TableColumn<FigureInfo, String> aliasName2Column = new TableColumn<>("Alias2");
+//        aliasName2Column.setCellValueFactory(
+//                new PropertyValueFactory<>("aliasName2")
+//        );
+//        TableColumn<FigureInfo, String> aliasName3Column = new TableColumn<>("Alias3");
+//        aliasName3Column.setCellValueFactory(
+//                new PropertyValueFactory<>("aliasName3")
+//        );
+//        nameTableView.setItems(this.data);
+//        nameTableView.getColumns().addAll(nameColumn, aliasName1Column, aliasName2Column, aliasName3Column);
 
 
         // add grid and nameListView to container
@@ -226,8 +240,12 @@ public class MainGUI extends Application {
         occurrenceBarChart = graphDrawer.getOccurrenceBarChart();
         stackSpanBarChart = graphDrawer.getStackSpanBarChart();
         spanBarChart = graphDrawer.getSpanBarChart();
+        occurrenceScatterPlotImageView = graphDrawer.getOccurrenceScatterPlotImageView();
 
         bottomHBox.getChildren().addAll(occurrenceBarChart, stackSpanBarChart);
+
+        personHBox.setVisible(false);
+        personHBox.getChildren().addAll(occurrenceScatterPlotImageView, closeTableView);
 
 
         // set root
@@ -247,7 +265,7 @@ public class MainGUI extends Application {
         resultTextArea.clear();
         nameListView.getItems().clear();
         nameComboBox.getItems().clear();
-        data.clear();
+        nameData.clear();
 
         occurrenceBarChart.getData().clear();
         spanBarChart.getData().clear();
@@ -257,9 +275,37 @@ public class MainGUI extends Application {
 
     public void personAnalyze(String figureName)
     {
+        String[][] figures = figureListInfo.getRelationTable();
+        List<List<Integer>> relationMatrix = figureListInfo.getRelationMatrix();
+        int label = -1;
+        for (int i = 0; i < 10; i++)
+        {
+            if (figures[i][0].equals(figureName))
+            {
+                label = i;
+                break;
+            }
+        }
+        int[][] correspondenceRelationDataMatrix = figureListInfo.getCorrespondenceRelationDataTable();
+        StringBuilder result = new StringBuilder();
+
+        result.append(figureName).append("联系最紧密的十个人依次是:").append("\n");
+        for (int i = 1; i < 10; i++)
+        {
+            if (i == label) {continue;}
+            result.append(figures[label][i]).append(" (").append(correspondenceRelationDataMatrix[label][i]).append(") tar");
+            if (i != 9)
+            {
+                result.append(" > ");
+            }
+        }
+        result.append("\n");
+        result.append(resultTextArea.getText().toString()).append("\n");
+
+
+        resultTextArea.setText(result.toString());
     }
 
-    // TODO: tableview of close figures: public void update closeTable()
 
     private void initNames()
     {
@@ -304,13 +350,12 @@ public class MainGUI extends Application {
         targetFigureList.get(7).setAliasName("子龙");
         targetFigureList.get(7).setLabel(7);
 
-        targetFigureList.add(new FigureInfo(("吕布")));
-        targetFigureList.get(8).setAliasName("奉先");
-        targetFigureList.get(8).setAliasName("温侯");
+        targetFigureList.add(new FigureInfo(("鲁肃")));
+        targetFigureList.get(8).setAliasName("子敬");
         targetFigureList.get(8).setLabel(8);
 
-        targetFigureList.add(new FigureInfo(("董卓")));
-        targetFigureList.get(9).setAliasName("仲颖");
+        targetFigureList.add(new FigureInfo(("张辽")));
+        targetFigureList.get(9).setAliasName("文远");
         targetFigureList.get(9).setLabel(9);
 
         for (FigureInfo figure : targetFigureList)
@@ -328,8 +373,118 @@ public class MainGUI extends Application {
                 nameComboBox.getItems().add(targetName);
             }
 
-            this.data.add(figure);
+            this.nameData.add(figure);
         }
+
+    }
+
+    private void setCloseTableView()
+    {
+//        this.relationData = FXCollections.observableArrayList();
+//
+//        CountTest closeCount = new CountTest();
+//        FigureListInfo figureListInfo = new FigureListInfo(closeCount.getTargetFigureList());
+        System.out.print(figureListInfo);
+
+        String[][] relationTable = figureListInfo.getRelationTable();
+        figureListInfo.printMatrix(figureListInfo.getRelationMatrix());
+        figureListInfo.printMatrix(relationTable);
+
+//        for (FigureInfo figure : targetFigureList)
+//        {
+//            FigureRelation figureRelation = new FigureRelation(figure.getName());
+//            for (String name : relationTable[figure.getLabel()])
+//            {
+//                figureRelation.addName(name);
+//            }
+//            figureRelation.setFigrues();
+//            relationData.add(figureRelation);
+//        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            FigureRelation figureRelation = new FigureRelation(relationTable[i][0]);
+            for (int j = 1; j < 10; j++)
+            {
+                figureRelation.addName(relationTable[i][j]);
+            }
+            figureRelation.setFigrues();
+            relationData.add(figureRelation);
+        }
+
+        TableColumn<FigureRelation, String> figureColumn = new TableColumn<>("Name");
+        figureColumn.setCellValueFactory(
+                new PropertyValueFactory<>("figureName")
+        );
+        TableColumn<FigureRelation, String> relationColumn1 = new TableColumn<>("Figure1");
+        relationColumn1.setCellValueFactory(
+                new PropertyValueFactory<>("figure1")
+        );
+        TableColumn<FigureRelation, String> relationColumn2 = new TableColumn<>("Figure2");
+        relationColumn2.setCellValueFactory(
+                new PropertyValueFactory<>("figure2")
+        );
+        TableColumn<FigureRelation, String> relationColumn3 = new TableColumn<>("Figure3");
+        relationColumn3.setCellValueFactory(
+                new PropertyValueFactory<>("figure3")
+        );
+        TableColumn<FigureRelation, String> relationColumn4 = new TableColumn<>("Figure4");
+        relationColumn4.setCellValueFactory(
+                new PropertyValueFactory<>("figure4")
+        );
+        TableColumn<FigureRelation, String> relationColumn5 = new TableColumn<>("Figure5");
+        relationColumn5.setCellValueFactory(
+                new PropertyValueFactory<>("figure5")
+        );
+        TableColumn<FigureRelation, String> relationColumn6 = new TableColumn<>("Figure6");
+        relationColumn6.setCellValueFactory(
+                new PropertyValueFactory<>("figure6")
+        );
+        TableColumn<FigureRelation, String> relationColumn7 = new TableColumn<>("Figure7");
+        relationColumn7.setCellValueFactory(
+                new PropertyValueFactory<>("figure7")
+        );
+        TableColumn<FigureRelation, String> relationColumn8 = new TableColumn<>("Figure8");
+        relationColumn8.setCellValueFactory(
+                new PropertyValueFactory<>("figure8")
+        );
+        TableColumn<FigureRelation, String> relationColumn9 = new TableColumn<>("Figure9");
+        relationColumn9.setCellValueFactory(
+                new PropertyValueFactory<>("figure9")
+        );
+        closeTableView.setItems(relationData);
+
+        closeTableView.getColumns().addAll
+                (
+                        figureColumn, relationColumn1, relationColumn2, relationColumn3, relationColumn4,
+                        relationColumn5, relationColumn6, relationColumn7, relationColumn8, relationColumn9
+                );
+
+
+    }
+
+    private void setNameTableView()
+    {
+        this.nameData = FXCollections.observableArrayList();
+
+        TableColumn<FigureInfo, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(
+                new PropertyValueFactory<>("name")
+        );
+        TableColumn<FigureInfo, String> aliasName1Column = new TableColumn<>("Alias1");
+        aliasName1Column.setCellValueFactory(
+                new PropertyValueFactory<>("aliasName1")
+        );
+        TableColumn<FigureInfo, String> aliasName2Column = new TableColumn<>("Alias2");
+        aliasName2Column.setCellValueFactory(
+                new PropertyValueFactory<>("aliasName2")
+        );
+        TableColumn<FigureInfo, String> aliasName3Column = new TableColumn<>("Alias3");
+        aliasName3Column.setCellValueFactory(
+                new PropertyValueFactory<>("aliasName3")
+        );
+        nameTableView.setItems(this.nameData);
+        nameTableView.getColumns().addAll(nameColumn, aliasName1Column, aliasName2Column, aliasName3Column);
     }
 
     private void addName()
@@ -353,7 +508,10 @@ public class MainGUI extends Application {
                 nameListView.getItems().add(targetName);
             }
 
-            this.data.add(figure);
+            int order = figureListInfo.getListLength() + 1;
+            figure.setLabel(order);
+
+            this.nameData.add(figure);
 
             targetNameField.clear();
         }
@@ -409,33 +567,31 @@ public class MainGUI extends Application {
 
             StringBuilder result = new StringBuilder();
 
-            // TODO: 将map改为直接对targetFigureList操作
             Map<String, Map<String, Object>> nameOccurrencesMap = new HashMap<>(); // 记录每个人名的出现次数和位置
             for (FigureInfo figure : targetFigureList) {
-                result.append("Occurrences of '").append(figure.getName()).append("': ")
-                        .append(figure.getOccurrences()).append("\n");
-                result.append("Positions of '").append(figure.getName()).append("': ")
-                        .append(figure.getPosition()).append("\n\n");
+//                result.append("Occurrences of '").append(figure.getName()).append("': ")
+//                        .append(figure.getOccurrences()).append("\n");
+//                result.append("Positions of '").append(figure.getName()).append("': ")
+//                        .append(figure.getPosition()).append("\n\n");
 
                 Map<String, Object> nameInfo = new HashMap<>();
                 nameInfo.put("Occurrences", figure.getOccurrences());
                 nameInfo.put("Positions", figure.getPosition());
                 nameOccurrencesMap.put(figure.getName(), nameInfo);
             }
-            resultTextArea.setText(result.toString());
+//            resultTextArea.setText(result.toString());
 
 
 
             graphDrawer.updateOccurrenceBarChart(targetFigureList);
             graphDrawer.updateStackSpanChart(targetFigureList);
             graphDrawer.updateSpanBarChart(targetFigureList, totalCharacterCount);
-
-            occurrenceScatterPlotImage = new Image("/scatter_plot.png");
+            graphDrawer.updateOccurrenceScaterPlotImage(targetFigureList);
 
         }
         else
         {
-            resultTextArea.setText("No file contents found.");
+            System.out.println("No contents found");
         }
     }
 
@@ -446,23 +602,31 @@ public class MainGUI extends Application {
             bottomHBox.setVisible(false);
             spanBarChart.setVisible(false);
 
+//            occurrenceScatterPlotImageView.setVisible(true);
+//            root.setCenter(occurrenceScatterPlotImageView);
+            root.setCenter(resultTextArea);
             root.setBottom(personHBox);
-            //TODO: root.setCenter()
-            ImageView occurrenceScatterPlotImageView = new ImageView(occurrenceScatterPlotImage);
-            root.setCenter(occurrenceScatterPlotImageView);
+
+            occurrenceScatterPlotImageView.setVisible(true);
+            closeTableView.setVisible(true);
+            resultTextArea.setVisible(true);
+            personHBox.setVisible(true);
 
             personButton.setText("Back");
             personButton.setOnAction(e -> togglePersonView());
             // 还可以执行其他隐藏的逻辑，比如将 VBox 显示出来
             // vbox.setVisible(true);
         } else {
-            root.getCenter().setVisible(false);
+            occurrenceScatterPlotImageView.setVisible(false);
+            personHBox.setVisible(false);
+            resultTextArea.setVisible(false);
+            closeTableView.setVisible(false);
+
             bottomHBox.setVisible(true);
             spanBarChart.setVisible(true);
 
             root.setBottom(bottomHBox);
             root.setCenter(spanBarChart);
-            //TODO: root.setCenter()
 
             personButton.setText("Person");
             personButton.setOnAction(e -> togglePersonView());

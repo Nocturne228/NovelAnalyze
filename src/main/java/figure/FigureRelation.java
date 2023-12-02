@@ -3,6 +3,7 @@ package figure;
 
 import javafx.scene.control.TableView;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,10 +21,74 @@ public class FigureRelation
     private String figure7;
     private String figure8;
     private String figure9;
+    private List<String> nameList;
 
     public FigureRelation(String figureName)
     {
         this.figureName = figureName;
+        nameList = new ArrayList<>();
+    }
+    public void addName(String name)
+    {
+        nameList.add(name);
+    }
+
+    public void setFigrues()
+    {
+        setFigure1(nameList.get(0));
+        setFigure2(nameList.get(1));
+        setFigure3(nameList.get(2));
+        setFigure4(nameList.get(3));
+        setFigure5(nameList.get(4));
+        setFigure6(nameList.get(5));
+        setFigure7(nameList.get(6));
+        setFigure8(nameList.get(7));
+        setFigure9(nameList.get(8));
+    }
+
+    public String getFigure1()
+    {
+        return figure1;
+    }
+
+    public String getFigure2()
+    {
+        return figure2;
+    }
+
+    public String getFigure3()
+    {
+        return figure3;
+    }
+
+    public String getFigure4()
+    {
+        return figure4;
+    }
+
+    public String getFigure5()
+    {
+        return figure5;
+    }
+
+    public String getFigure6()
+    {
+        return figure6;
+    }
+
+    public String getFigure7()
+    {
+        return figure7;
+    }
+
+    public String getFigure8()
+    {
+        return figure8;
+    }
+
+    public String getFigure9()
+    {
+        return figure9;
     }
 
     public String getFigureName()

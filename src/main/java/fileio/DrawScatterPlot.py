@@ -36,4 +36,3 @@ dpi = 100
 fig.set_size_inches(width_in_pixels / dpi, height_in_pixels / dpi)
 
 plt.savefig('/Users/nocturne/Downloads/Project/Java/NovelAnalyze/src/main/resources/scatter_plot.png', dpi=dpi, bbox_inches='tight')
-plt.show()

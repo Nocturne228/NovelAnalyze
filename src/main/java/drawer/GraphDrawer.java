@@ -1,9 +1,13 @@
 package drawer;
 
+import fileio.CSVWriter;
+import fileio.CallPythonScript;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.chart.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.text.Font;
 
 import java.text.DecimalFormat;
@@ -26,6 +30,7 @@ public class GraphDrawer
     XYChart.Series<String, Number> seriesEnd = new XYChart.Series<>();
     private StackedBarChart<String, Number> stackSpanBarChart;
     private BarChartExt<String, Number> spanBarChart;
+    private Image occurrenceScatterPlotImage;
 
     public GraphDrawer() {
 
@@ -66,6 +71,8 @@ public class GraphDrawer
         spanBarChart = new BarChartExt<>(barChartSpanX, barChartSpanY);
         spanBarChart.setTitle("Percentage");
 
+        occurrenceScatterPlotImage = new Image("/scatter_plot.png");
+
     }
 
     public BarChart<String, Number> getOccurrenceBarChart()
@@ -81,6 +88,24 @@ public class GraphDrawer
     public BarChartExt<String, Number> getSpanBarChart()
     {
         return spanBarChart;
+    }
+
+    public ImageView getOccurrenceScatterPlotImageView()
+    {
+        ImageView occurrenceScatterPlotImageView = new ImageView(occurrenceScatterPlotImage);
+        return occurrenceScatterPlotImageView;
+    }
+
+    public void updateOccurrenceScaterPlotImage(List<FigureInfo> targetFigureLIst)
+    {
+//        String csvDataFilePath = "/Users/nocturne/Downloads/Project/Java/NovelAnalyze/src/main/resources/data.csv";
+//        CSVWriter csvWriter = new CSVWriter();
+//        csvWriter.writeDataCSV(csvDataFilePath, targetFigureLIst);
+//        CallPythonScript callPythonScript = new CallPythonScript();
+//        String pythonPlotScriptPath = "/Users/nocturne/Downloads/Project/Java/NovelAnalyze/src/main/java/fileio/DrawScatterPlot.py";
+//        callPythonScript.callPython(pythonPlotScriptPath);
+
+        this.occurrenceScatterPlotImage = new Image("/scatter_plot.png");
     }
 
     public void updateSpanBarChart(List<FigureInfo> targetFigureList, int totalTextCount)

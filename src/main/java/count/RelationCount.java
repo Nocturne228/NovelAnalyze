@@ -1,8 +1,11 @@
 package count;
 
 import figure.FigureInfo;
+import figure.FigureListInfo;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class RelationCount
@@ -45,8 +48,47 @@ public class RelationCount
             }
             RelationMatrix.add(array);
         }
+
+        for (int i = 0; i < RelationMatrix.size(); i++) {
+            List<Integer> row = RelationMatrix.get(i);
+            List<IndexedValue> indexedValues = new ArrayList<>();
+
+            for (int j = 0; j < row.size(); j++) {
+                indexedValues.add(new IndexedValue(j, row.get(j)));
+            }
+
+            // 根据亲密度从高到低排序
+            Collections.sort(indexedValues, Comparator.comparing(IndexedValue::getValue).reversed());
+
+            // 输出排序后的人物序号
+            System.out.print("Person " + i + ": ");
+            for (IndexedValue indexedValue : indexedValues) {
+                System.out.print(indexedValue.getIndex() + " ");
+            }
+            System.out.println();
+        }
+
         return RelationMatrix;
     }
+
+    public static class IndexedValue {
+        private final int index;
+        private final int value;
+
+        public IndexedValue(int index, int value) {
+            this.index = index;
+            this.value = value;
+        }
+
+        public int getIndex() {
+            return index;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
+
 
     public void printMatrix(List<List<Integer>> matrix)
     {
@@ -59,5 +101,6 @@ public class RelationCount
             System.out.println();
         }
     }
+
 
 }
