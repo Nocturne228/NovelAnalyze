@@ -1,74 +1,158 @@
 package drawer;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class GraphTest extends JFrame {
-    public GraphTest() {
-        setTitle("Table to Image Example");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+import figure.ExampleFigureList;
+import figure.FigureInfo;
+import javafx.application.Application;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.chart.Axis;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
-        // 创建表格数据
-        Object[][] data = {
-                {"John", 25, "Male"},
-                {"Jane", 30, "Female"},
-                {"Doe", 35, "Male"}
-        };
+public class GraphTest extends Application {
 
-        // 创建表格列名
-        String[] columnNames = {"Name", "Age", "Gender"};
+    final static String austria = "Austria";
+    final static String brazil = "Brazil";
+    final static String france = "France";
+    final static String italy = "Italy";
+    final static String usa = "USA";
 
-        // 创建 JTable
-        JTable table = new JTable(data, columnNames);
+    /**
+     * Barchart with a clear button
+     */
+    @Override
+    public void start(Stage stage) {
 
-        // 将表格放入滚动窗格中
-        JScrollPane scrollPane = new JScrollPane(table);
+        final CategoryAxis xAxis = new CategoryAxis();
+        final NumberAxis yAxis = new NumberAxis();
+        final BarChartExt<String, Number> bc = new BarChartExt<String, Number>(xAxis, yAxis);
 
-        // 将滚动窗格添加到 JFrame
-        getContentPane().add(scrollPane, BorderLayout.CENTER);
+        bc.setTitle("Country Summary");
+        xAxis.setLabel("Country");
+        yAxis.setLabel("Value");
+        yAxis.setAutoRanging(false); // 禁用自动范围调整
+        yAxis.setTickUnit(100);
+        yAxis.setUpperBound(1000);
 
-        // 设置 JFrame 大小并显示
-        setSize(400, 300);
-        setLocationRelativeTo(null);
-        setVisible(false); // 设置为 false，不显示窗口
+        XYChart.Series series1 = new XYChart.Series();
+        series1.setName("2003");
+        List<FigureInfo> targetFigureList = ExampleFigureList.getTargetFigureList();
+        for (FigureInfo figure : targetFigureList)
+        {
+            System.out.println(figure.getEnd() - figure.getStart());
+            series1.getData().add(new XYChart.Data(figure.getName(),(figure.getEnd() - figure.getStart()) / 1000));
+        }
 
-        // 调用保存图像的方法
-        saveTableImage(table, "/Users/nocturne/Downloads/Project/Java/NovelAnalyze/src/main/resources/table.png");
+
+        bc.getData().addAll(series1);
+
+        Button clearButton = new Button("Clear");
+        clearButton.setOnAction(e -> {
+
+            bc.getData().clear();
+
+        });
+
+        HBox toolbar = new HBox();
+        toolbar.getChildren().addAll(clearButton);
+
+        VBox root = new VBox();
+        VBox.setVgrow(bc, Priority.ALWAYS);
+        root.getChildren().addAll(toolbar, bc);
+
+        Scene scene = new Scene(root, 800, 600);
+
+        stage.setScene(scene);
+        stage.show();
     }
 
-    private void saveTableImage(JTable table, String filePath) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                int width = table.getWidth();
-                int height = table.getHeight() + table.getTableHeader().getHeight(); // 添加表头的高度
+    /**
+     * Custom barchart with text on top of bars
+     *
+     * @param <X>
+     * @param <Y>
+     */
+    private static class BarChartExt<X, Y> extends BarChart<X, Y> {
 
-                BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2d = image.createGraphics();
+        /**
+         * Registry for text nodes of the bars
+         */
+        Map<Node, Node> nodeMap = new HashMap<>();
 
-                // 设置白色背景
-                g2d.setColor(Color.WHITE);
-                g2d.fillRect(0, 0, width, height);
+        public BarChartExt(Axis xAxis, Axis yAxis) {
+            super(xAxis, yAxis);
+        }
 
-                // 绘制表格内容
-                table.paint(g2d);
-                table.getTableHeader().paint(g2d); // 绘制表头
+        /**
+         * Add text for bars
+         */
+        @Override
+        protected void seriesAdded(Series<X, Y> series, int seriesIndex) {
 
-                g2d.dispose();
+            super.seriesAdded(series, seriesIndex);
 
-                // 保存为 PNG 文件
-                ImageIO.write(image, "png", new File(filePath));
-                System.out.println("Table saved to: " + filePath);
-            } catch (IOException e) {
-                e.printStackTrace();
+            for (int j = 0; j < series.getData().size(); j++) {
+
+                Data<X, Y> item = series.getData().get(j);
+
+                Node text = new Text(String.valueOf(item.getYValue()));
+                nodeMap.put(item.getNode(), text);
+                getPlotChildren().add(text);
+
             }
-        });
+
+        }
+
+        /**
+         * Remove text of bars
+         */
+        @Override
+        protected void seriesRemoved(final Series<X, Y> series) {
+
+            for (Node bar : nodeMap.keySet()) {
+
+                Node text = nodeMap.get(bar);
+                getPlotChildren().remove(text);
+
+            }
+
+            nodeMap.clear();
+
+            super.seriesRemoved(series);
+        }
+
+        /**
+         * Adjust text of bars, position them on top
+         */
+        @Override
+        protected void layoutPlotChildren() {
+
+            super.layoutPlotChildren();
+
+            for (Node bar : nodeMap.keySet()) {
+
+                Node text = nodeMap.get(bar);
+
+                text.relocate(bar.getBoundsInParent().getMinX() + 15, bar.getBoundsInParent().getMinY() - 30);
+
+            }
+
+        }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new GraphTest());
+        launch(args);
     }
 }

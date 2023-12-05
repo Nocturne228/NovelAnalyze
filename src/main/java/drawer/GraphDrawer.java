@@ -1,13 +1,9 @@
 package drawer;
 
-import fileio.CSVWriter;
-import fileio.CallPythonScript;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+
+import figure.ExampleFigureList;
 import javafx.scene.Node;
 import javafx.scene.chart.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.text.Font;
 
 import java.text.DecimalFormat;
@@ -19,20 +15,35 @@ import javafx.scene.text.Text;
 public class GraphDrawer
 {
     private BarChart<String, Number> OccurrenceBarChart;
-    private final CategoryAxis occurrenceX = new CategoryAxis();
-    private final NumberAxis occurrenceY = new NumberAxis();
+    private CategoryAxis occurrenceX = new CategoryAxis();
+    private NumberAxis occurrenceY = new NumberAxis();
     private CategoryAxis spanX = new CategoryAxis();
     private NumberAxis spanY = new NumberAxis();
     private CategoryAxis barChartSpanX = new CategoryAxis();
     private NumberAxis barChartSpanY = new NumberAxis();
-    private
-    XYChart.Series<String, Number> seriesStart = new XYChart.Series<>();
-    XYChart.Series<String, Number> seriesEnd = new XYChart.Series<>();
+    private XYChart.Series<String, Number> seriesStart = new XYChart.Series<>();
+    private XYChart.Series<String, Number> seriesEnd = new XYChart.Series<>();
     private StackedBarChart<String, Number> stackSpanBarChart;
     private BarChartExt<String, Number> spanBarChart;
-    private Image occurrenceScatterPlotImage;
+    private ScatterChart<Number, Number> positionScatterChart;
+    private NumberAxis scatterX = new NumberAxis();
+    private NumberAxis scatterY = new NumberAxis();
+    private CategoryAxis spanWithNumberX = new CategoryAxis();
+    private NumberAxis spanWithNumberY = new NumberAxis();
+    private BarChartSpan spanBarChartWithNumber;
 
     public GraphDrawer() {
+
+        spanWithNumberX.setLabel("Name");
+        spanWithNumberX.setGapStartAndEnd(true);
+        spanWithNumberX.setAnimated(false);
+        spanWithNumberY.setLabel("Span");
+        spanWithNumberY.setAutoRanging(false);
+        spanWithNumberY.setTickUnit(100);
+        spanWithNumberY.setUpperBound(700);
+
+        scatterX.setLabel("Occurrence Positions");
+        scatterY.setLabel("Occurrence Times");
 
         // set occurrences axis attribute
         occurrenceX.setLabel("Names");
@@ -58,21 +69,31 @@ public class GraphDrawer
         occurrenceX.setTickLabelFont(chineseFont);
         spanX.setTickLabelFont(chineseFont);
         barChartSpanX.setTickLabelFont(chineseFont);
+        spanWithNumberX.setTickLabelFont(chineseFont);
 
+
+        positionScatterChart = new ScatterChart<>(scatterX, scatterY);
+        positionScatterChart.setMinSize(550, 400);
+        positionScatterChart.setTitle("Occurrence Position Chart");
 
         OccurrenceBarChart = new BarChart<>(occurrenceX, occurrenceY);
         OccurrenceBarChart.setTitle("Name Occurrences");
 
-//        spanBarChart = new BarChart<>(spanX, spanY);
-//        spanBarChart.setTitle("Position Span of Names");
         stackSpanBarChart = new StackedBarChart<>(spanX, spanY);
         stackSpanBarChart.setTitle("Position Span of Names");
 
         spanBarChart = new BarChartExt<>(barChartSpanX, barChartSpanY);
+        spanBarChart.setMaxSize(500, 400);
         spanBarChart.setTitle("Percentage");
 
-        occurrenceScatterPlotImage = new Image("/scatter_plot.png");
+        spanBarChartWithNumber = new BarChartSpan(spanWithNumberX, spanWithNumberY);
+        spanBarChartWithNumber.setMaxSize(500, 400);
+        spanBarChartWithNumber.setTitle("Span Chart");
+    }
 
+    public ScatterChart<Number, Number> getPositionScatterChart()
+    {
+        return positionScatterChart;
     }
 
     public BarChart<String, Number> getOccurrenceBarChart()
@@ -90,22 +111,67 @@ public class GraphDrawer
         return spanBarChart;
     }
 
-    public ImageView getOccurrenceScatterPlotImageView()
+    public BarChartSpan getSpanBarChartWithNumber()
     {
-        ImageView occurrenceScatterPlotImageView = new ImageView(occurrenceScatterPlotImage);
-        return occurrenceScatterPlotImageView;
+        return spanBarChartWithNumber;
     }
 
-    public void updateOccurrenceScaterPlotImage(List<FigureInfo> targetFigureLIst)
+    public void updateSpanBarChartWithNumber(List<FigureInfo> targetFigureList)
     {
-//        String csvDataFilePath = "/Users/nocturne/Downloads/Project/Java/NovelAnalyze/src/main/resources/data.csv";
-//        CSVWriter csvWriter = new CSVWriter();
-//        csvWriter.writeDataCSV(csvDataFilePath, targetFigureLIst);
-//        CallPythonScript callPythonScript = new CallPythonScript();
-//        String pythonPlotScriptPath = "/Users/nocturne/Downloads/Project/Java/NovelAnalyze/src/main/java/fileio/DrawScatterPlot.py";
-//        callPythonScript.callPython(pythonPlotScriptPath);
+        XYChart.Series series = new XYChart.Series();
+        series.setName("Figure Span");
 
-        this.occurrenceScatterPlotImage = new Image("/scatter_plot.png");
+        List<FigureInfo> sortedFigureList = targetFigureList.stream()
+                .sorted(Comparator.comparingInt(FigureInfo::getSpan))
+                .toList();
+
+        for (FigureInfo figure : sortedFigureList)
+        {
+            series.getData().add(new XYChart.Data(figure.getName(),(figure.getEnd() - figure.getStart()) / 1000));
+        }
+
+        spanBarChartWithNumber.getData().clear();
+        spanBarChartWithNumber.getData().addAll(series);
+
+    }
+
+    public void updatePositionScatterChart(List<FigureInfo> targetFigureList)
+    {
+        positionScatterChart.getData().clear();
+        List<List<Integer>> positionLists = new ArrayList<>();
+        for (FigureInfo figure :  targetFigureList)
+        {
+            positionLists.add(figure.getPosition());
+        }
+
+//        List<Integer> list0 = targetFigureList.get(0).getPosition();
+//        List<Integer> list1 = targetFigureList.get(1).getPosition();
+//        List<Integer> list2 = targetFigureList.get(2).getPosition();
+//        List<Integer> list3 = targetFigureList.get(3).getPosition();
+//        List<Integer> list4 = targetFigureList.get(4).getPosition();
+//        List<Integer> list5 = targetFigureList.get(5).getPosition();
+//        List<Integer> list6 = targetFigureList.get(6).getPosition();
+//        List<Integer> list7 = targetFigureList.get(7).getPosition();
+//        List<Integer> list8 = targetFigureList.get(8).getPosition();
+//        List<Integer> list9 = targetFigureList.get(9).getPosition();
+//
+//        List<List<Integer>> IntegerLists =
+//                Arrays.asList(list0, list1, list2, list3, list4, list5, list6, list7, list8, list9);
+
+        for (int i = 0; i < positionLists.size(); i++) {
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
+            series.setName(targetFigureList.get(i).getName());
+
+            List<Integer> integerList = positionLists.get(i);
+
+            for (int j = 0; j < integerList.size(); j++) {
+                series.getData().add(new XYChart.Data<>(integerList.get(j), j));
+            }
+
+            positionScatterChart.getData().add(series);
+        }
+
+        positionScatterChart.setStyle("-fx-font-family: 'STKaiti';");
     }
 
     public void updateSpanBarChart(List<FigureInfo> targetFigureList, int totalTextCount)
@@ -114,9 +180,6 @@ public class GraphDrawer
         XYChart.Series series2 = new XYChart.Series();
         series1.setName("Start");
         series2.setName("End");
-//        List<FigureInfo> sortedFigureList = targetFigureList.stream()
-//                .sorted(Comparator.comparingInt(FigureInfo::getSpan))
-//                .toList();
         for (FigureInfo figure : targetFigureList)
         {
             double startPercentage = (double)figure.getStart() / totalTextCount;
@@ -133,7 +196,6 @@ public class GraphDrawer
     public void updateOccurrenceBarChart(List<FigureInfo> targetFigureList) {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Occurrences");
-        ObservableList<String> data = FXCollections.observableArrayList();
 
         List<FigureInfo> sortedFigureList = targetFigureList.stream()
                 .sorted(Comparator.comparingInt(FigureInfo::getOccurrences))
@@ -142,11 +204,8 @@ public class GraphDrawer
         series.getData().clear();
         for (FigureInfo figure : sortedFigureList)
         {
-            data.add(figure.getName());
-            System.out.println(figure.getName() + figure.getOccurrences());
             series.getData().add(new XYChart.Data<>(figure.getName(), figure.getOccurrences()));
         }
-        occurrenceX.setCategories(data);
 
         OccurrenceBarChart.getData().clear();
         OccurrenceBarChart.getData().setAll(series);
@@ -248,6 +307,83 @@ public class GraphDrawer
     }
 
 
+    // ------------------------------------------------------------------------
 
+
+    static class BarChartSpan<X, Y> extends BarChart<X, Y> {
+
+        /**
+         * Registry for text nodes of the bars
+         */
+        Map<Node, Node> nodeMap = new HashMap<>();
+
+        public BarChartSpan(Axis xAxis, Axis yAxis) {
+            super(xAxis, yAxis);
+        }
+
+        /**
+         * Add text for bars
+         */
+        @Override
+        protected void seriesAdded(Series<X, Y> series, int seriesIndex) {
+
+            super.seriesAdded(series, seriesIndex);
+
+            for (int j = 0; j < series.getData().size(); j++) {
+
+                Data<X, Y> item = series.getData().get(j);
+
+                String value = String.valueOf(item.getYValue());
+                double originalValue = Double.parseDouble(value);
+                DecimalFormat percentageFormat = new DecimalFormat("000");
+                String formattedPercentage = percentageFormat.format(originalValue) + "000";
+
+                Node text = new Text(formattedPercentage);
+
+                text.setStyle("-fx-font-size: 11;");
+
+                nodeMap.put(item.getNode(), text);
+                getPlotChildren().add(text);
+
+            }
+
+        }
+
+        /**
+         * Remove text of bars
+         */
+        @Override
+        protected void seriesRemoved(final Series<X, Y> series) {
+
+            for (Node bar : nodeMap.keySet()) {
+
+                Node text = nodeMap.get(bar);
+                getPlotChildren().remove(text);
+
+            }
+
+            nodeMap.clear();
+
+            super.seriesRemoved(series);
+        }
+
+        /**
+         * Adjust text of bars, position them on top
+         */
+        @Override
+        protected void layoutPlotChildren() {
+
+            super.layoutPlotChildren();
+
+            for (Node bar : nodeMap.keySet()) {
+
+                Node text = nodeMap.get(bar);
+
+                text.relocate(bar.getBoundsInParent().getMinX() - 10, bar.getBoundsInParent().getMinY() - 20);
+
+            }
+
+        }
+    }
 }
 

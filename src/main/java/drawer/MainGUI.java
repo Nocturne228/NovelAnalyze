@@ -10,10 +10,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
-import javafx.scene.chart.StackedBarChart;
+import javafx.scene.chart.ScatterChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -23,6 +22,7 @@ import fileio.TextFileReader;
 import count.TextCount;
 import figure.FigureInfo;
 import drawer.GraphDrawer.*;
+
 import louvain.algotest.ApplyLouvain;
 
 public class MainGUI extends Application {
@@ -33,8 +33,10 @@ public class MainGUI extends Application {
     private ListView<String> nameListView;
     private TextArea resultTextArea;
     private BarChart<String, Number> occurrenceBarChart;
-    private StackedBarChart<String, Number> stackSpanBarChart;
+//    private StackedBarChart<String, Number> stackSpanBarChart;
+    private BarChartSpan<String, Number> spanBarChartWithNumber;
     private BarChartExt<String, Number> spanBarChart;
+    private ScatterChart<Number, Number> positionScatterChart;
     private GraphDrawer graphDrawer;
     private ComboBox<String> nameComboBox;
     private List<FigureInfo> targetFigureList;
@@ -47,7 +49,6 @@ public class MainGUI extends Application {
     private HBox algorithmButtonHBox;
     private VBox listRelationVBox;
     public BorderPane root;
-    private ImageView occurrenceScatterPlotImageView;
     private FigureListInfo figureListInfo;
     private TableView<FigureInfo> nameTableView;
     private TableView<FigureRelation> closeTableView;
@@ -132,11 +133,15 @@ public class MainGUI extends Application {
         // Create nameListView
         nameListView = new ListView<>();
         nameListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        nameListView.setStyle("-fx-font-family: 'STKaiti';");
 
         // set result text area
         resultTextArea = new TextArea();
         resultTextArea.setWrapText(true);
         resultTextArea.setEditable(false);
+        resultTextArea.setFocusTraversable(false);
+        resultTextArea.setMouseTransparent(true);
+        resultTextArea.setStyle("-fx-font-family: 'STKaiti';");
 
         // Link Button with function
         addButton.setOnAction(e -> addName());
@@ -232,14 +237,16 @@ public class MainGUI extends Application {
 
         graphDrawer = new GraphDrawer();
         occurrenceBarChart = graphDrawer.getOccurrenceBarChart();
-        stackSpanBarChart = graphDrawer.getStackSpanBarChart();
+//        stackSpanBarChart = graphDrawer.getStackSpanBarChart();
         spanBarChart = graphDrawer.getSpanBarChart();
-        occurrenceScatterPlotImageView = graphDrawer.getOccurrenceScatterPlotImageView();
+        positionScatterChart = graphDrawer.getPositionScatterChart();
+        spanBarChartWithNumber = graphDrawer.getSpanBarChartWithNumber();
 
-        bottomHBox.getChildren().addAll(occurrenceBarChart, stackSpanBarChart);
+//        bottomHBox.getChildren().addAll(occurrenceBarChart, stackSpanBarChart);
+        bottomHBox.getChildren().addAll(occurrenceBarChart, spanBarChartWithNumber);
 
         personHBox.setVisible(false);
-        personHBox.getChildren().addAll(occurrenceScatterPlotImageView, closeTableView);
+        personHBox.getChildren().addAll(positionScatterChart, closeTableView);
 
         algorithmButtonHBox.getChildren().addAll(algoButton1, algoButton2);
         algorithmButtonHBox.setAlignment(Pos.CENTER);
@@ -267,7 +274,8 @@ public class MainGUI extends Application {
 
         occurrenceBarChart.getData().clear();
         spanBarChart.getData().clear();
-        stackSpanBarChart.getData().clear();
+        spanBarChartWithNumber.getData().clear();
+//        stackSpanBarChart.getData().clear();
 
     }
 
@@ -287,18 +295,18 @@ public class MainGUI extends Application {
         int[][] correspondenceRelationDataMatrix = figureListInfo.getCorrespondenceRelationDataTable();
         StringBuilder result = new StringBuilder();
 
-        result.append(figureName).append("联系最紧密的十个人依次是:").append("\n");
+        result.append(figureName).append("联系最紧密的九个人依次是:").append("\n");
         for (int i = 1; i < 10; i++)
         {
             if (i == label) {continue;}
-            result.append(figures[label][i]).append(" (").append(correspondenceRelationDataMatrix[label][i]).append(") tar");
+            result.append(figures[label][i]).append(" (").append(correspondenceRelationDataMatrix[label][i]).append(") ");
             if (i != 9)
             {
                 result.append(" > ");
             }
         }
-        result.append("\n");
-        result.append(resultTextArea.getText().toString()).append("\n");
+        result.append("\n\n");
+        result.append(resultTextArea.getText()).append("\n");
 
 
         resultTextArea.setText(result.toString());
@@ -309,53 +317,6 @@ public class MainGUI extends Application {
     {
         targetFigureList.clear();
         targetFigureList = ExampleFigureList.getTargetFigureList();
-//        targetFigureList.add(new FigureInfo(("曹操")));
-//        targetFigureList.get(0).setAliasName("操");
-//        targetFigureList.get(0).setAliasName("孟德");
-//        targetFigureList.get(0).setAliasName("阿瞒");
-//        targetFigureList.get(0).setLabel(0);
-//
-//        targetFigureList.add(new FigureInfo(("刘备")));
-//        targetFigureList.get(1).setAliasName("玄德");
-//        targetFigureList.get(1).setAliasName("皇叔");
-//        targetFigureList.get(1).setAliasName("使君");
-//        targetFigureList.get(1).setLabel(1);
-//
-//        targetFigureList.add(new FigureInfo(("孙权")));
-//        targetFigureList.get(2).setAliasName("仲谋");
-//        targetFigureList.get(2).setAliasName("吴侯");
-//        targetFigureList.get(2).setLabel(2);
-//
-//        targetFigureList.add(new FigureInfo(("关羽")));
-//        targetFigureList.get(3).setAliasName("云长");
-//        targetFigureList.get(3).setAliasName("关公");
-//        targetFigureList.get(3).setLabel(3);
-//
-//        targetFigureList.add(new FigureInfo(("诸葛亮")));
-//        targetFigureList.get(4).setAliasName("孔明");
-//        targetFigureList.get(4).setAliasName("卧龙");
-//        targetFigureList.get(4).setLabel(4);
-//
-//        targetFigureList.add(new FigureInfo(("郭嘉")));
-//        targetFigureList.get(5).setAliasName("奉孝");
-//        targetFigureList.get(5).setLabel(5);
-//
-//        targetFigureList.add(new FigureInfo(("周瑜")));
-//        targetFigureList.get(6).setAliasName("公瑾");
-//        targetFigureList.get(6).setAliasName("周郎");
-//        targetFigureList.get(6).setLabel(6);
-//
-//        targetFigureList.add(new FigureInfo(("赵云")));
-//        targetFigureList.get(7).setAliasName("子龙");
-//        targetFigureList.get(7).setLabel(7);
-//
-//        targetFigureList.add(new FigureInfo(("鲁肃")));
-//        targetFigureList.get(8).setAliasName("子敬");
-//        targetFigureList.get(8).setLabel(8);
-//
-//        targetFigureList.add(new FigureInfo(("张辽")));
-//        targetFigureList.get(9).setAliasName("文远");
-//        targetFigureList.get(9).setLabel(9);
 
         for (FigureInfo figure : targetFigureList)
         {
@@ -441,6 +402,7 @@ public class MainGUI extends Application {
                         relationColumn5, relationColumn6, relationColumn7, relationColumn8, relationColumn9
                 );
 
+        closeTableView.setStyle("-fx-font-family: 'STKaiti';");
 
     }
 
@@ -466,6 +428,7 @@ public class MainGUI extends Application {
         );
         nameTableView.setItems(this.nameData);
         nameTableView.getColumns().addAll(nameColumn, aliasName1Column, aliasName2Column, aliasName3Column);
+        nameTableView.setStyle("-fx-font-family: 'STKaiti';");
     }
 
     private void addName()
@@ -518,6 +481,7 @@ public class MainGUI extends Application {
     }
 
     private void analyzeText() {
+
         if (targetFigureList.isEmpty())
         {
             return;
@@ -550,24 +514,20 @@ public class MainGUI extends Application {
 
             Map<String, Map<String, Object>> nameOccurrencesMap = new HashMap<>(); // 记录每个人名的出现次数和位置
             for (FigureInfo figure : targetFigureList) {
-//                result.append("Occurrences of '").append(figure.getName()).append("': ")
-//                        .append(figure.getOccurrences()).append("\n");
-//                result.append("Positions of '").append(figure.getName()).append("': ")
-//                        .append(figure.getPosition()).append("\n\n");
 
                 Map<String, Object> nameInfo = new HashMap<>();
                 nameInfo.put("Occurrences", figure.getOccurrences());
                 nameInfo.put("Positions", figure.getPosition());
                 nameOccurrencesMap.put(figure.getName(), nameInfo);
             }
-//            resultTextArea.setText(result.toString());
 
 
 
             graphDrawer.updateOccurrenceBarChart(targetFigureList);
-            graphDrawer.updateStackSpanChart(targetFigureList);
+//            graphDrawer.updateStackSpanChart(targetFigureList);
             graphDrawer.updateSpanBarChart(targetFigureList, totalCharacterCount);
-            graphDrawer.updateOccurrenceScaterPlotImage(targetFigureList);
+            graphDrawer.updatePositionScatterChart(targetFigureList);
+            graphDrawer.updateSpanBarChartWithNumber(targetFigureList);
 
         }
         else
@@ -587,17 +547,13 @@ public class MainGUI extends Application {
             root.setBottom(personHBox);
 
             listRelationVBox.setVisible(true);
-            occurrenceScatterPlotImageView.setVisible(true);
             closeTableView.setVisible(true);
-//            resultTextArea.setVisible(true);
             personHBox.setVisible(true);
 
             personButton.setText("Back");
             personButton.setOnAction(e -> togglePersonView());
         } else {
-            occurrenceScatterPlotImageView.setVisible(false);
             personHBox.setVisible(false);
-//            resultTextArea.setVisible(false);
             closeTableView.setVisible(false);
             listRelationVBox.setVisible(false);
 
@@ -616,13 +572,14 @@ public class MainGUI extends Application {
     {
         int[] answer = ApplyLouvain.Louvain();
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(resultTextArea.getText());
         List<String> result = ApplyLouvain.printNameByGroup(answer);
         stringBuilder.append("应用算法1的团队划分结果为:\n");
         for (String string : result)
         {
             stringBuilder.append(string).append("\n");
         }
+        stringBuilder.append("\n");
+        stringBuilder.append(resultTextArea.getText());
         resultTextArea.setText(stringBuilder.toString());
     }
 
@@ -630,13 +587,14 @@ public class MainGUI extends Application {
     {
         int[] answer = ApplyLouvain.pythonGreedyModularityCommunityAlgo();
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(resultTextArea.getText());
         List<String> result = ApplyLouvain.printNameByGroup(answer);
         stringBuilder.append("应用算法2的团队划分结果为:\n");
         for (String string : result)
         {
             stringBuilder.append(string).append("\n");
         }
+        stringBuilder.append("\n");
+        stringBuilder.append(resultTextArea.getText());
         resultTextArea.setText(stringBuilder.toString());
     }
 }

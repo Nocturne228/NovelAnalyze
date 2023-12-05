@@ -1,7 +1,5 @@
 package figure;
 
-import count.RelationCount;
-
 import java.util.*;
 
 public class FigureListInfo
@@ -19,6 +17,13 @@ public class FigureListInfo
         this.RelationMatrix = new ArrayList<>();
         getRelationMatrix();
         listLength = targetFigureList.size();
+    }
+
+    public void setTargetFigureList(List<FigureInfo> targetFigureList)
+    {
+        getRelationMatrix();
+        listLength = targetFigureList.size();
+        this.targetFigureList = targetFigureList;
     }
 
     public int getListLength()
@@ -138,7 +143,7 @@ public class FigureListInfo
 
     public String[][] getRelationTable() {
         int numRows = listLength;
-        int numCols = 10;
+        int numCols = listLength;
 
         String[][] RelationTable = new String[numRows][numCols];
 

@@ -114,13 +114,13 @@ public class FigureInfo
 
     public int getStart()
     {
-        start = this.position.get(0);
+        start = position.get(0);
         return start;
     }
 
     public int getEnd()
     {
-        end = this.position.get(this.position.size() - 1);
+        end = this.position.get(position.size() - 1);
         return end;
     }
 
