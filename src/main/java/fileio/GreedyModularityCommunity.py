@@ -20,5 +20,14 @@ for i in range(num_characters):
 
 communities = nx.algorithms.community.modularity_max.greedy_modularity_communities(G)
 
+result_list = []
+temp_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
 for team in communities:
-    print("Team:", team)
+    result_list.append(list(team))
+
+for i in result_list:
+    for item in i:
+        temp_list[item] = next((index for index, sublist in enumerate(result_list) if sublist == i), -1)
+
+print(temp_list)

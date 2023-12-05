@@ -9,14 +9,14 @@ public class FigureListInfo
     private List<FigureInfo> targetFigureList;
 
     private List<List<Integer>> RelationMatrix;
-    private int threshold = 500;
+    private int threshold = 1000;
     private int listLength;
 
 
     public FigureListInfo(List<FigureInfo> targetFigureList)
     {
         this.targetFigureList = targetFigureList;
-        this.RelationMatrix = new ArrayList<>(); // 在这里为 RelationMatrix 分配内存
+        this.RelationMatrix = new ArrayList<>();
         getRelationMatrix();
         listLength = targetFigureList.size();
     }
@@ -64,6 +64,24 @@ public class FigureListInfo
         return count;
     }
 
+    public int[][] getExampleDataMatix()
+    {
+        int[][] closeCount = new int[10][10];
+        for (FigureInfo character : targetFigureList)
+        {
+            for (FigureInfo figure : targetFigureList)
+            {
+                if (character.getName().equals(figure.getName()))
+                {
+                    continue;
+                }
+
+                int count = getCountOfCloseElements(character.getPosition(), figure.getPosition(), threshold);
+                closeCount[character.getLabel()][figure.getLabel()] = count;
+            }
+        }
+        return closeCount;
+    }
 
     public List<List<Integer>> getRelationMatrix()
     {

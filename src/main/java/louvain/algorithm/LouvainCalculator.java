@@ -13,46 +13,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 
-/**
- * louvain划分算法
- * 1.效率上还有优化的空间，（逆）邻接表的操作
- * 2.模块度优化
- *
- * @author Aldebran
- * @since 11/09/2020
- */
 public class LouvainCalculator {
 
-    /**
-     * 图结构
-     */
     private Graph graph;
 
-    /**
-     * 缓存总权重
-     */
     private double totalW;
 
-    /**
-     * 节点社区编号
-     */
     private int[] nodeCommunityNo;
 
-    /**
-     * 缓存节点度中心性（带权重版，无向）
-     */
     private double[] nodeBothWeight;
 
-    /**
-     * 黏合系数 多层情况下，越小越容易黏合
-     */
     private double stickingK = 0.65;
 
-    /**
-     * 构造器，需要图作为数据依据以及生成缓存
-     *
-     * @param graph 图
-     */
     public LouvainCalculator(Graph graph) {
         // 初始化操作
         totalW = graph.totalWeight();
@@ -67,31 +39,14 @@ public class LouvainCalculator {
         this.graph = graph;
     }
 
-    /**
-     * 黏合系数 多层情况下，越小越容易黏合
-     *
-     * @param stickingK 系数
-     */
     public void setStickingK(double stickingK) {
         this.stickingK = stickingK;
     }
 
-    /**
-     * 判断两个点是否属于同一个社区
-     *
-     * @param id1 节点1 id
-     * @param id2 节点2 id
-     * @return 属于同一社区返回1，不属于则返回0
-     */
     private int c(int id1, int id2) {
         return nodeCommunityNo[id1] == nodeCommunityNo[id2] ? 1 : 0;
     }
 
-    /**
-     * 计算当前模块度（全局模块度）
-     *
-     * @return ModuleQ值
-     */
     private double getModuleQ() {
         double q = 0.0;
         Set<Integer> nodeIds = graph.getNodes();
@@ -110,11 +65,6 @@ public class LouvainCalculator {
         return q / totalW;
     }
 
-    /**
-     * 单层louvain社区划分算法
-     *
-     * @return 社区划分结果
-     */
     public CommunityInfo findCommunitiesSingleLevel() {
         while (true) {
             int[] copy = nodeCommunityNo.clone();
@@ -179,91 +129,6 @@ public class LouvainCalculator {
             }
         }
         return communityInfo;
-    }
-
-    /**
-     * 多层louvain社区划分算法
-     *
-     * @param level 层数
-     * @return 社区划分结果
-     */
-    public CommunityInfo findCommunitiesMultiLevel(int level) {
-        CommunityInfo[] levelResult = new CommunityInfo[level + 1];
-        Graph currentGraph = graph;
-        while (level > 0) {
-            CommunityInfo communityInfo;
-            if (currentGraph == this.graph) {
-                communityInfo = findCommunitiesSingleLevel();
-            } else {
-                communityInfo = new LouvainCalculator(currentGraph).findCommunitiesSingleLevel();
-            }
-            levelResult[level] = communityInfo;
-            Graph newGraph = new Graph();
-            for (int c1 = 0; c1 < communityInfo.communitiesNo; c1++) {
-                boolean ac = true;
-                for (int c2 = 0; c2 < communityInfo.communitiesNo; c2++) {
-                    if (c1 == c2) {
-                        continue;
-                    }
-                    int[] c1NodeIds = communityInfo.communityNodeIds[c1];
-                    int[] c2NodeIds = communityInfo.communityNodeIds[c2];
-                    List<Link> links = new ArrayList<>();
-                    for (int c1OneNode : c1NodeIds) {
-                        for (int c2OneNode : c2NodeIds) {
-                            Link tempLink = currentGraph.getLinkFromOneToAnother(c1OneNode, c2OneNode);
-                            if (tempLink != null) {
-                                links.add(tempLink);
-                            }
-                        }
-                    }
-                    if (!links.isEmpty()) {
-                        Link newLink = new Link(c1, c2, 0.0);
-                        links.forEach(link -> newLink.weight += link.weight);
-                        newGraph.addLinks(Arrays.asList(newLink));
-                        ac = false;
-                    }
-                }
-                if (ac) {
-                    newGraph.addAcNodes(Arrays.asList(c1));
-                }
-            }
-            currentGraph = newGraph;
-            level--;
-        }
-        CommunityInfo finalComm = new CommunityInfo();
-        Map<Integer, Integer> commNoFinalCommNoMap = new HashMap<>();
-        int cCommNum = 0;
-        for (int i = 0; i < levelResult[levelResult.length - 1].nodeCommunityNo.length; i++) {
-            for (int j = levelResult.length - 2; j >= 1; j--) {
-                int c = levelResult[levelResult.length - 1].nodeCommunityNo[i];
-                int newC = levelResult[j].nodeCommunityNo[c];
-                levelResult[levelResult.length - 1].nodeCommunityNo[i] = newC;
-            }
-            int c = levelResult[levelResult.length - 1].nodeCommunityNo[i];
-            if (!commNoFinalCommNoMap.containsKey(c)) {
-                commNoFinalCommNoMap.put(c, cCommNum++);
-            }
-            levelResult[levelResult.length - 1].nodeCommunityNo[i] = commNoFinalCommNoMap.get(c);
-        }
-        finalComm.nodeCommunityNo = levelResult[levelResult.length - 1].nodeCommunityNo;
-        finalComm.communitiesNo = cCommNum;
-        Map<Integer, List<Integer>> map = new HashMap<>();
-        for (int i = 0; i < cCommNum; i++) {
-            map.put(i, new ArrayList<>());
-        }
-        for (int id = 0; id < finalComm.nodeCommunityNo.length; id++) {
-            map.get(finalComm.nodeCommunityNo[id]).add(id);
-        }
-        finalComm.communityNodeIds = new int[cCommNum][];
-        map.forEach((cId, nodeIds) -> {
-            int[] ids = new int[nodeIds.size()];
-            for (int i = 0; i < nodeIds.size(); i++) {
-                ids[i] = nodeIds.get(i);
-            }
-            finalComm.communityNodeIds[cId] = ids;
-        });
-
-        return finalComm;
     }
 
 }

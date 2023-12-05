@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class CallPythonScript {
-    public void callPython(String pythonScriptPath) {
+    public static void callPython(String pythonScriptPath) {
         Process proc;
         try {
             String[] args1 = new String[] { "python3", pythonScriptPath};

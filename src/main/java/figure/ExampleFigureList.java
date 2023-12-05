@@ -1,7 +1,13 @@
 package figure;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ExampleFigureList
 {
@@ -58,6 +64,78 @@ public class ExampleFigureList
         targetFigureList.get(9).setAliasName("文远");
         targetFigureList.get(9).setLabel(9);
 
+        List<String> fileContents = getFileContents();
+
+        for (FigureInfo figure : targetFigureList)
+        {
+            for (int i = 0; i < fileContents.size(); i++)
+            {
+                String content = fileContents.get(i);
+
+                String regex = buildRegex(figure);
+
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(content);
+
+                while (matcher.find())
+                {
+                    int index = matcher.start();
+                    figure.addPosition(index);
+                    figure.incOccurrences();
+                }
+            }
+        }
         return targetFigureList;
+    }
+
+    public static List<String> getFileContents()
+    {
+        String folderPath = "/Users/nocturne/Downloads/Project/Java/NovelAnalyze/src/main/resources";
+        List<String> fileContents = new ArrayList<>();
+        File folder = new File(folderPath);
+        File[] files = folder.listFiles();
+
+        if (files != null)
+        {
+            for (File file : files)
+            {
+                if (file.isFile() && file.getName().endsWith(".txt"))
+                {
+                    try (BufferedReader reader = new BufferedReader(new FileReader(file)))
+                    {
+                        StringBuilder content = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null)
+                        {
+                            content.append(line).append("\n");
+                        }
+                        fileContents.add(content.toString());
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return fileContents;
+    }
+
+    public static String buildRegex(FigureInfo figure)
+    {
+        StringBuilder regexBuilder = new StringBuilder();
+        regexBuilder.append(Pattern.quote(figure.getName()));
+
+        if (figure.getAliasName1() != null) {
+            regexBuilder.append("|").append(Pattern.quote(figure.getAliasName1()));
+        }
+        if (figure.getAliasName2() != null) {
+            regexBuilder.append("|").append(Pattern.quote(figure.getAliasName2()));
+        }
+        if (figure.getAliasName3() != null) {
+            regexBuilder.append("|").append(Pattern.quote(figure.getAliasName3()));
+        }
+
+        return regexBuilder.toString();
     }
 }

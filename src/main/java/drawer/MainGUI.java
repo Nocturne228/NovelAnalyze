@@ -1,12 +1,13 @@
 package drawer;
 
-import count.CountTest;
+import figure.ExampleFigureList;
 import figure.FigureListInfo;
 import figure.FigureRelation;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.StackedBarChart;
@@ -22,6 +23,7 @@ import fileio.TextFileReader;
 import count.TextCount;
 import figure.FigureInfo;
 import drawer.GraphDrawer.*;
+import louvain.algotest.ApplyLouvain;
 
 public class MainGUI extends Application {
 
@@ -39,8 +41,11 @@ public class MainGUI extends Application {
     private ObservableList<FigureInfo> nameData;
     private ObservableList<FigureRelation> relationData;
     private Button personButton;
+
     private HBox bottomHBox;
     private HBox personHBox;
+    private HBox algorithmButtonHBox;
+    private VBox listRelationVBox;
     public BorderPane root;
     private ImageView occurrenceScatterPlotImageView;
     private FigureListInfo figureListInfo;
@@ -75,6 +80,12 @@ public class MainGUI extends Application {
         personHBox = new HBox(10);
         personHBox.setPadding(new Insets(10, 10, 10, 10));
 
+        algorithmButtonHBox = new HBox(20);
+        algorithmButtonHBox.setPadding(new Insets(10, 20, 10, 20));
+
+        listRelationVBox = new VBox(10);
+        listRelationVBox.setPadding(new Insets(10, 10, 10, 10));
+
         // Create Grid alignment container
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -105,6 +116,8 @@ public class MainGUI extends Application {
         Button refreshButton = new Button("Reset");
         personButton = new Button("Person");
         Button selectButton = new Button("Select Person");
+        Button algoButton1 = new Button("Group Algo1");
+        Button algoButton2 = new Button("Group Algo2");
 
 
         refreshButton.setPrefWidth(150);
@@ -146,6 +159,9 @@ public class MainGUI extends Application {
                 personAnalyze(selectedName);
             }
         });
+        // TODO applyAlgo1, 2
+        algoButton1.setOnAction(e -> applyAlgo1());
+        algoButton2.setOnAction(e -> applyAlgo2());
 
 
         // Create column constraint for GridPane
@@ -202,32 +218,10 @@ public class MainGUI extends Application {
 
         this.relationData = FXCollections.observableArrayList();
 
-        CountTest closeCount = new CountTest();
-        figureListInfo = new FigureListInfo(closeCount.getTargetFigureList());
+        figureListInfo = new FigureListInfo(ExampleFigureList.getTargetFigureList());
 
         closeTableView = new TableView<>();
         setCloseTableView();
-
-//        this.data = FXCollections.observableArrayList();
-//
-//        TableColumn<FigureInfo, String> nameColumn = new TableColumn<>("Name");
-//        nameColumn.setCellValueFactory(
-//                new PropertyValueFactory<>("name")
-//        );
-//        TableColumn<FigureInfo, String> aliasName1Column = new TableColumn<>("Alias1");
-//        aliasName1Column.setCellValueFactory(
-//                new PropertyValueFactory<>("aliasName1")
-//        );
-//        TableColumn<FigureInfo, String> aliasName2Column = new TableColumn<>("Alias2");
-//        aliasName2Column.setCellValueFactory(
-//                new PropertyValueFactory<>("aliasName2")
-//        );
-//        TableColumn<FigureInfo, String> aliasName3Column = new TableColumn<>("Alias3");
-//        aliasName3Column.setCellValueFactory(
-//                new PropertyValueFactory<>("aliasName3")
-//        );
-//        nameTableView.setItems(this.data);
-//        nameTableView.getColumns().addAll(nameColumn, aliasName1Column, aliasName2Column, aliasName3Column);
 
 
         // add grid and nameListView to container
@@ -246,6 +240,10 @@ public class MainGUI extends Application {
 
         personHBox.setVisible(false);
         personHBox.getChildren().addAll(occurrenceScatterPlotImageView, closeTableView);
+
+        algorithmButtonHBox.getChildren().addAll(algoButton1, algoButton2);
+        algorithmButtonHBox.setAlignment(Pos.CENTER);
+        listRelationVBox.getChildren().addAll(algorithmButtonHBox, resultTextArea);
 
 
         // set root
@@ -310,53 +308,54 @@ public class MainGUI extends Application {
     private void initNames()
     {
         targetFigureList.clear();
-        targetFigureList.add(new FigureInfo(("曹操")));
-        targetFigureList.get(0).setAliasName("操");
-        targetFigureList.get(0).setAliasName("孟德");
-        targetFigureList.get(0).setAliasName("阿瞒");
-        targetFigureList.get(0).setLabel(0);
-
-        targetFigureList.add(new FigureInfo(("刘备")));
-        targetFigureList.get(1).setAliasName("玄德");
-        targetFigureList.get(1).setAliasName("皇叔");
-        targetFigureList.get(1).setAliasName("使君");
-        targetFigureList.get(1).setLabel(1);
-
-        targetFigureList.add(new FigureInfo(("孙权")));
-        targetFigureList.get(2).setAliasName("仲谋");
-        targetFigureList.get(2).setAliasName("吴侯");
-        targetFigureList.get(2).setLabel(2);
-
-        targetFigureList.add(new FigureInfo(("关羽")));
-        targetFigureList.get(3).setAliasName("云长");
-        targetFigureList.get(3).setAliasName("关公");
-        targetFigureList.get(3).setLabel(3);
-
-        targetFigureList.add(new FigureInfo(("诸葛亮")));
-        targetFigureList.get(4).setAliasName("孔明");
-        targetFigureList.get(4).setAliasName("卧龙");
-        targetFigureList.get(4).setLabel(4);
-
-        targetFigureList.add(new FigureInfo(("郭嘉")));
-        targetFigureList.get(5).setAliasName("奉孝");
-        targetFigureList.get(5).setLabel(5);
-
-        targetFigureList.add(new FigureInfo(("周瑜")));
-        targetFigureList.get(6).setAliasName("公瑾");
-        targetFigureList.get(6).setAliasName("周郎");
-        targetFigureList.get(6).setLabel(6);
-
-        targetFigureList.add(new FigureInfo(("赵云")));
-        targetFigureList.get(7).setAliasName("子龙");
-        targetFigureList.get(7).setLabel(7);
-
-        targetFigureList.add(new FigureInfo(("鲁肃")));
-        targetFigureList.get(8).setAliasName("子敬");
-        targetFigureList.get(8).setLabel(8);
-
-        targetFigureList.add(new FigureInfo(("张辽")));
-        targetFigureList.get(9).setAliasName("文远");
-        targetFigureList.get(9).setLabel(9);
+        targetFigureList = ExampleFigureList.getTargetFigureList();
+//        targetFigureList.add(new FigureInfo(("曹操")));
+//        targetFigureList.get(0).setAliasName("操");
+//        targetFigureList.get(0).setAliasName("孟德");
+//        targetFigureList.get(0).setAliasName("阿瞒");
+//        targetFigureList.get(0).setLabel(0);
+//
+//        targetFigureList.add(new FigureInfo(("刘备")));
+//        targetFigureList.get(1).setAliasName("玄德");
+//        targetFigureList.get(1).setAliasName("皇叔");
+//        targetFigureList.get(1).setAliasName("使君");
+//        targetFigureList.get(1).setLabel(1);
+//
+//        targetFigureList.add(new FigureInfo(("孙权")));
+//        targetFigureList.get(2).setAliasName("仲谋");
+//        targetFigureList.get(2).setAliasName("吴侯");
+//        targetFigureList.get(2).setLabel(2);
+//
+//        targetFigureList.add(new FigureInfo(("关羽")));
+//        targetFigureList.get(3).setAliasName("云长");
+//        targetFigureList.get(3).setAliasName("关公");
+//        targetFigureList.get(3).setLabel(3);
+//
+//        targetFigureList.add(new FigureInfo(("诸葛亮")));
+//        targetFigureList.get(4).setAliasName("孔明");
+//        targetFigureList.get(4).setAliasName("卧龙");
+//        targetFigureList.get(4).setLabel(4);
+//
+//        targetFigureList.add(new FigureInfo(("郭嘉")));
+//        targetFigureList.get(5).setAliasName("奉孝");
+//        targetFigureList.get(5).setLabel(5);
+//
+//        targetFigureList.add(new FigureInfo(("周瑜")));
+//        targetFigureList.get(6).setAliasName("公瑾");
+//        targetFigureList.get(6).setAliasName("周郎");
+//        targetFigureList.get(6).setLabel(6);
+//
+//        targetFigureList.add(new FigureInfo(("赵云")));
+//        targetFigureList.get(7).setAliasName("子龙");
+//        targetFigureList.get(7).setLabel(7);
+//
+//        targetFigureList.add(new FigureInfo(("鲁肃")));
+//        targetFigureList.get(8).setAliasName("子敬");
+//        targetFigureList.get(8).setLabel(8);
+//
+//        targetFigureList.add(new FigureInfo(("张辽")));
+//        targetFigureList.get(9).setAliasName("文远");
+//        targetFigureList.get(9).setLabel(9);
 
         for (FigureInfo figure : targetFigureList)
         {
@@ -380,26 +379,8 @@ public class MainGUI extends Application {
 
     private void setCloseTableView()
     {
-//        this.relationData = FXCollections.observableArrayList();
-//
-//        CountTest closeCount = new CountTest();
-//        FigureListInfo figureListInfo = new FigureListInfo(closeCount.getTargetFigureList());
-        System.out.print(figureListInfo);
 
         String[][] relationTable = figureListInfo.getRelationTable();
-        figureListInfo.printMatrix(figureListInfo.getRelationMatrix());
-        figureListInfo.printMatrix(relationTable);
-
-//        for (FigureInfo figure : targetFigureList)
-//        {
-//            FigureRelation figureRelation = new FigureRelation(figure.getName());
-//            for (String name : relationTable[figure.getLabel()])
-//            {
-//                figureRelation.addName(name);
-//            }
-//            figureRelation.setFigrues();
-//            relationData.add(figureRelation);
-//        }
 
         for (int i = 0; i < 10; i++)
         {
@@ -602,25 +583,23 @@ public class MainGUI extends Application {
             bottomHBox.setVisible(false);
             spanBarChart.setVisible(false);
 
-//            occurrenceScatterPlotImageView.setVisible(true);
-//            root.setCenter(occurrenceScatterPlotImageView);
-            root.setCenter(resultTextArea);
+            root.setCenter(listRelationVBox);
             root.setBottom(personHBox);
 
+            listRelationVBox.setVisible(true);
             occurrenceScatterPlotImageView.setVisible(true);
             closeTableView.setVisible(true);
-            resultTextArea.setVisible(true);
+//            resultTextArea.setVisible(true);
             personHBox.setVisible(true);
 
             personButton.setText("Back");
             personButton.setOnAction(e -> togglePersonView());
-            // 还可以执行其他隐藏的逻辑，比如将 VBox 显示出来
-            // vbox.setVisible(true);
         } else {
             occurrenceScatterPlotImageView.setVisible(false);
             personHBox.setVisible(false);
-            resultTextArea.setVisible(false);
+//            resultTextArea.setVisible(false);
             closeTableView.setVisible(false);
+            listRelationVBox.setVisible(false);
 
             bottomHBox.setVisible(true);
             spanBarChart.setVisible(true);
@@ -630,8 +609,34 @@ public class MainGUI extends Application {
 
             personButton.setText("Person");
             personButton.setOnAction(e -> togglePersonView());
-            // 反之，隐藏 VBox
-            // vbox.setVisible(false);
         }
+    }
+
+    public void applyAlgo1()
+    {
+        int[] answer = ApplyLouvain.Louvain();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(resultTextArea.getText());
+        List<String> result = ApplyLouvain.printNameByGroup(answer);
+        stringBuilder.append("应用算法1的团队划分结果为:\n");
+        for (String string : result)
+        {
+            stringBuilder.append(string).append("\n");
+        }
+        resultTextArea.setText(stringBuilder.toString());
+    }
+
+    public void applyAlgo2()
+    {
+        int[] answer = ApplyLouvain.pythonGreedyModularityCommunityAlgo();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(resultTextArea.getText());
+        List<String> result = ApplyLouvain.printNameByGroup(answer);
+        stringBuilder.append("应用算法2的团队划分结果为:\n");
+        for (String string : result)
+        {
+            stringBuilder.append(string).append("\n");
+        }
+        resultTextArea.setText(stringBuilder.toString());
     }
 }
