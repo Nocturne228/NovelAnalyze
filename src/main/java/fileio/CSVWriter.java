@@ -10,7 +10,7 @@ import java.util.List;
 
 public class CSVWriter
 {
-    public void writeMatrixCSV(String csvFilePath, List<List<Integer>> matrix)
+    public static void writeMatrixCSV(String csvFilePath, int[][] matrix)
     {
         File file = new File(csvFilePath);
         if (file.exists())
@@ -20,12 +20,12 @@ public class CSVWriter
 
         try (FileWriter writer = new FileWriter(csvFilePath)) {
             // 遍历矩阵并写入 CSV 文件
-            for (List<Integer> row : matrix)
+            for (int[] row : matrix)
             {
-                for (int i = 0; i < row.size(); i++)
+                for (int i = 0; i < row.length; i++)
                 {
-                    writer.append(String.valueOf(row.get(i)));
-                    if (i < row.size() - 1) {
+                    writer.append(String.valueOf(row[i]));
+                    if (i < row.length - 1) {
                         writer.append(",");
                     }
                 }

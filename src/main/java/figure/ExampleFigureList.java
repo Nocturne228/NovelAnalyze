@@ -43,6 +43,11 @@ public class ExampleFigureList
         targetFigureList.get(4).setAliasName("卧龙");
         targetFigureList.get(4).setLabel(4);
 
+//        targetFigureList.add(new FigureInfo("夏侯渊"));
+//        targetFigureList.get(4).setAliasName("妙才");
+//        targetFigureList.get(4).setAliasName("渊");
+//        targetFigureList.get(4).setLabel(4);
+
         targetFigureList.add(new FigureInfo(("郭嘉")));
         targetFigureList.get(5).setAliasName("奉孝");
         targetFigureList.get(5).setLabel(5);

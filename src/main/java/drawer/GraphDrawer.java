@@ -131,7 +131,7 @@ public class GraphDrawer
         }
 
         spanBarChartWithNumber.getData().clear();
-        spanBarChartWithNumber.getData().addAll(series);
+        spanBarChartWithNumber.getData().setAll(series);
 
     }
 
@@ -166,6 +166,31 @@ public class GraphDrawer
 
             for (int j = 0; j < integerList.size(); j++) {
                 series.getData().add(new XYChart.Data<>(integerList.get(j), j));
+            }
+
+            positionScatterChart.getData().add(series);
+        }
+
+        positionScatterChart.setStyle("-fx-font-family: 'STKaiti';");
+    }
+
+    public void switchScatterChart(List<FigureInfo> targetFigureList)
+    {
+        positionScatterChart.getData().clear();
+        List<List<Integer>> positionLists = new ArrayList<>();
+        for (FigureInfo figure :  targetFigureList)
+        {
+            positionLists.add(figure.getPosition());
+        }
+
+        for (int i = 0; i < positionLists.size(); i++) {
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
+            series.setName(targetFigureList.get(i).getName());
+
+            List<Integer> integerList = positionLists.get(i);
+
+            for (int j = 0; j < integerList.size(); j++) {
+                series.getData().add(new XYChart.Data<>(integerList.get(j), i + 1));
             }
 
             positionScatterChart.getData().add(series);
@@ -229,7 +254,7 @@ public class GraphDrawer
         }
 
         stackSpanBarChart.getData().clear();
-        stackSpanBarChart.getData().addAll(seriesStart, seriesEnd);
+        stackSpanBarChart.getData().setAll(seriesStart, seriesEnd);
     }
 
     /**

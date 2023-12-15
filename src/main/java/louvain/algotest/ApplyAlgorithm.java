@@ -5,7 +5,7 @@ import figure.FigureInfo;
 import figure.FigureListInfo;
 import fileio.CallPythonScript;
 import louvain.algorithm.CommunityInfo;
-import louvain.algorithm.LouvainCalculator;
+import louvain.algorithm.CommunityCalculator;
 import louvain.entity.Graph;
 import louvain.entity.Link;
 
@@ -15,24 +15,25 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ApplyLouvain
+public class ApplyAlgorithm
 {
     public static int[] Louvain()
     {
         Graph g = new Graph();
         List<FigureInfo> targetFigureList = ExampleFigureList.getTargetFigureList();
         FigureListInfo figureListInfo = new FigureListInfo(targetFigureList);
+        int length = targetFigureList.size();
         int[][] adjancencyMatrix = figureListInfo.getExampleDataMatix();
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < length; i++)
         {
-            for (int j = 0; j < 10; j++)
+            for (int j = 0; j < length; j++)
             {
                 if (i == j)     {continue;}
                 g.addLinks(Arrays.asList(new Link(i, j, adjancencyMatrix[i][j])));
             }
         }
 
-        LouvainCalculator louvainCalculator = new LouvainCalculator(g);
+        CommunityCalculator louvainCalculator = new CommunityCalculator(g);
         louvainCalculator.setStickingK(0.60);
         CommunityInfo communityInfo = louvainCalculator.findCommunitiesSingleLevel();
         System.out.println(communityInfo);

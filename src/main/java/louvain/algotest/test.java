@@ -10,15 +10,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class test
 {
     public static void main(String[] args)
     {
-        int[] result = ApplyLouvain.pythonGreedyModularityCommunityAlgo();
-        int[] answer = ApplyLouvain.Louvain();
+        int[] result = ApplyAlgorithm.pythonGreedyModularityCommunityAlgo();
+        int[] answer = ApplyAlgorithm.Louvain();
 
         System.out.println("\n这是python的networx库");
         printNameByGroup(result);

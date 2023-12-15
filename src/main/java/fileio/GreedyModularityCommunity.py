@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import networkx as nx
 
-matrix_file_path="/Users/nocturne/Downloads/Project/Java/NovelAnalyze/src/main/resources/matrix.csv"
+matrix_file_path="/Users/nocturne/Downloads/Project/Java/NovelAnalyze/src/main/resources/matrixEx.csv"
 matrix_close = np.genfromtxt(matrix_file_path, delimiter=',')
 num_characters = len(matrix_close)
 

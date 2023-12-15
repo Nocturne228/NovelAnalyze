@@ -13,7 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 
-public class LouvainCalculator {
+public class CommunityCalculator
+{
 
     private Graph graph;
 
@@ -25,7 +26,7 @@ public class LouvainCalculator {
 
     private double stickingK = 0.65;
 
-    public LouvainCalculator(Graph graph) {
+    public CommunityCalculator(Graph graph) {
         // 初始化操作
         totalW = graph.totalWeight();
         nodeCommunityNo = new int[graph.nodesNum()];

@@ -1,5 +1,7 @@
 package figure;
 
+import fileio.CSVWriter;
+
 import java.util.*;
 
 public class FigureListInfo
@@ -71,7 +73,7 @@ public class FigureListInfo
 
     public int[][] getExampleDataMatix()
     {
-        int[][] closeCount = new int[10][10];
+        int[][] closeCount = new int[getListLength()][getListLength()];
         for (FigureInfo character : targetFigureList)
         {
             for (FigureInfo figure : targetFigureList)
@@ -85,6 +87,9 @@ public class FigureListInfo
                 closeCount[character.getLabel()][figure.getLabel()] = count;
             }
         }
+
+        String csvFilePath = "/Users/nocturne/Downloads/Project/Java/NovelAnalyze/src/main/resources/matrix.csv";
+        CSVWriter.writeMatrixCSV(csvFilePath, closeCount);
         return closeCount;
     }
 

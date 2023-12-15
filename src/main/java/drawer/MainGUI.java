@@ -23,7 +23,7 @@ import count.TextCount;
 import figure.FigureInfo;
 import drawer.GraphDrawer.*;
 
-import louvain.algotest.ApplyLouvain;
+import louvain.algotest.ApplyAlgorithm;
 
 public class MainGUI extends Application {
 
@@ -52,6 +52,7 @@ public class MainGUI extends Application {
     private FigureListInfo figureListInfo;
     private TableView<FigureInfo> nameTableView;
     private TableView<FigureRelation> closeTableView;
+    private boolean noClick = true;
 
 
     public void show(String[] args)
@@ -163,6 +164,7 @@ public class MainGUI extends Application {
             {
                 personAnalyze(selectedName);
             }
+
         });
         // TODO applyAlgo1, 2
         algoButton1.setOnAction(e -> applyAlgo1());
@@ -240,6 +242,14 @@ public class MainGUI extends Application {
 //        stackSpanBarChart = graphDrawer.getStackSpanBarChart();
         spanBarChart = graphDrawer.getSpanBarChart();
         positionScatterChart = graphDrawer.getPositionScatterChart();
+        positionScatterChart.setOnMouseClicked(
+                e -> {
+                    if (noClick)
+                        graphDrawer.switchScatterChart(targetFigureList);
+                    else
+                        graphDrawer.updatePositionScatterChart(targetFigureList);
+                    noClick = !noClick;
+                });
         spanBarChartWithNumber = graphDrawer.getSpanBarChartWithNumber();
 
 //        bottomHBox.getChildren().addAll(occurrenceBarChart, stackSpanBarChart);
@@ -284,7 +294,7 @@ public class MainGUI extends Application {
         String[][] figures = figureListInfo.getRelationTable();
         List<List<Integer>> relationMatrix = figureListInfo.getRelationMatrix();
         int label = -1;
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < targetFigureList.size(); i++)
         {
             if (figures[i][0].equals(figureName))
             {
@@ -295,14 +305,15 @@ public class MainGUI extends Application {
         int[][] correspondenceRelationDataMatrix = figureListInfo.getCorrespondenceRelationDataTable();
         StringBuilder result = new StringBuilder();
 
+
         result.append(figureName).append("联系最紧密的九个人依次是:").append("\n");
-        for (int i = 1; i < 10; i++)
+        for (int i = 1; i < targetFigureList.size(); i++)
         {
-            if (i == label) {continue;}
+//            if (i == label) {continue;}
             result.append(figures[label][i]).append(" (").append(correspondenceRelationDataMatrix[label][i]).append(") ");
-            if (i != 9)
+            if (i != targetFigureList.size()-1)
             {
-                result.append(" > ");
+                result.append(" -> ");
             }
         }
         result.append("\n\n");
@@ -570,9 +581,9 @@ public class MainGUI extends Application {
 
     public void applyAlgo1()
     {
-        int[] answer = ApplyLouvain.Louvain();
+        int[] answer = ApplyAlgorithm.Louvain();
         StringBuilder stringBuilder = new StringBuilder();
-        List<String> result = ApplyLouvain.printNameByGroup(answer);
+        List<String> result = ApplyAlgorithm.printNameByGroup(answer);
         stringBuilder.append("应用算法1的团队划分结果为:\n");
         for (String string : result)
         {
@@ -585,9 +596,9 @@ public class MainGUI extends Application {
 
     public void applyAlgo2()
     {
-        int[] answer = ApplyLouvain.pythonGreedyModularityCommunityAlgo();
+        int[] answer = ApplyAlgorithm.pythonGreedyModularityCommunityAlgo();
         StringBuilder stringBuilder = new StringBuilder();
-        List<String> result = ApplyLouvain.printNameByGroup(answer);
+        List<String> result = ApplyAlgorithm.printNameByGroup(answer);
         stringBuilder.append("应用算法2的团队划分结果为:\n");
         for (String string : result)
         {
